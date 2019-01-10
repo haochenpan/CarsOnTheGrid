@@ -26,6 +26,12 @@ def gen_init_grid():
     for i in range(1, config.NUM_OF_CARS):
         r = randint(config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX)
         c = randint(config.FIRST_COL_INDEX, config.LAST_COL_INDEX)
+
+        # ensure single source
+        while r == config.FIRST_ROW_INDEX and c == config.FIRST_COL_INDEX:
+            r = randint(config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX)
+            c = randint(config.FIRST_COL_INDEX, config.LAST_COL_INDEX)
+
         car = gen_car(i, (r, c), source_pos)
         grid[(r, c)].append(car)
 

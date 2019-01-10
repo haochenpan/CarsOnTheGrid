@@ -20,8 +20,14 @@ def move(grid: dict):
             car["trace"].append(next_pos)
             # next_pos[1] could == (1, 0)
             next_grid[next_pos[1]].append(car)
-            if car["when"] > -1:
+
+            # for multi-source
+            # if car["when"] > -1:
+
+            # for single-source
+            if car["when"] == 0:
                 next_has_source.add(next_pos[1])
+
     return next_grid, next_has_source
 
 
@@ -32,15 +38,23 @@ def propagate(round: int, grid: dict, sources: set):
                 car['when'] = round
 
 
-if __name__ == '__main__':
+def grid_generator():
     round_counter = 0
     grid, sources = helper.gen_init_grid()
+    yield grid
     while (round_counter <= config.MAX_MOVE and
            len(sources) < config.NUM_OF_ROWS * config.NUM_OF_COLS):
         round_counter += 1
         grid, sources = move(grid)
+        yield grid
         propagate(round_counter, grid, sources)
-    helper.print_grid(grid)
+    # helper.print_grid(grid)
 
 
-
+if __name__ == '__main__':
+    gen = grid_generator()
+    while True:
+        try:
+            print(next(gen))
+        except StopIteration:
+            break
