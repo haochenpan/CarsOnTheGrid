@@ -7,6 +7,8 @@ import config
 import move_lib
 import help_lib
 import copy
+import gc
+from pympler.tracker import SummaryTracker
 
 
 def move(grid: dict):
@@ -25,7 +27,7 @@ def move(grid: dict):
             # new_dir_and_pos[1] could == (1, 0)
             next_grid[new_dir_and_pos[1]].append(car)
 
-            if config.CONSTANT_SOURCE_THROUGHOUT:
+            if config.CONST_NUM_OF_SOURCE:
                 if car["when"] == 0:
                     next_has_source.add(new_dir_and_pos[1])
             else:
@@ -42,22 +44,49 @@ def propagate(curr_round: int, grid: dict, sources: set):
                 car['when'] = curr_round
 
 
-def grid_get_states() -> list:
-    states = []
+def run_ui() -> list:
+    phrases = []
     round_counter = 0
-    grid, sources = help_lib.init_the_grid()
-    states.append(copy.deepcopy(grid))
-    while (round_counter < config.MAX_MOVE and
-           len(sources) < config.NUM_OF_ROWS * config.NUM_OF_COLS):
+    grid, broadcasters = help_lib.init_the_grid()
+    phrases.append((copy.deepcopy(grid), broadcasters))
+    while (round_counter < config.NUM_OF_MOVES and
+           len(broadcasters) < config.NUM_OF_ROWS * config.NUM_OF_COLS):
         round_counter += 1
-        grid, sources = move(grid)
-        propagate(round_counter, grid, sources)
-        states.append(copy.deepcopy(grid))
-    return states
+        grid, broadcasters = move(grid)
+        propagate(round_counter, grid, broadcasters)
+        phrases.append(copy.deepcopy((copy.deepcopy(grid), broadcasters)))
+    return phrases
+
+
+def run():
+    round_counter = 0
+    grid, broadcasters = help_lib.init_the_grid()
+    while (round_counter < config.NUM_OF_MOVES and
+           len(broadcasters) < config.NUM_OF_ROWS * config.NUM_OF_COLS):
+        round_counter += 1
+        grid, broadcasters = move(grid)
+        propagate(round_counter, grid, broadcasters)
+    return grid, broadcasters
 
 
 if __name__ == '__main__':
-    grid_list = grid_get_states()
-    for each in grid_list:
-        help_lib.print_grid(each)
+    # grid_list = grid_get_states()
+    # for each in grid_list:
+    #     help_lib.print_grid(each)
+    # tracker = SummaryTracker()
+    # # tracker.print_diff()
+    # for i in range(10):
+    #     # help_lib.print_grid(run())
+    #     print(i)
+    #     run()
+    # gc.collect()
+    # tracker.print_diff()
+    # grid, sources = run()
+    # # help_lib.report_grid(grid, sources, 0, True)
+    # # help_lib.report_grid(grid, sources, 1, True)
+    # help_lib.report_grid(grid, sources, 2, False)
+    # # help_lib.report_grid(grid, sources, 3, True)
+    # help_lib.report_grid(grid, sources, 4, False)
+    # help_lib.get_report(grid, sources)
+    pass
 

@@ -21,13 +21,13 @@ def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
     :return: The direction and position coordinate (i.e. (d, (x, y)))
     """
     if config.BORDER_BEHAVIOR == "restricted":
-        return gen_new_pos_res(curr_pos)
+        return get_new_dir_and_pos_res(curr_pos)
     else:
         raise Exception
 
 
-def gen_new_pos_res(curr_pos: tuple) -> tuple:
-    if config.MOVE_DIR_COUNT == 8:
+def get_new_dir_and_pos_res(curr_pos: tuple) -> tuple:
+    if config.NUM_OF_DIRS == 8:
         directions = {1, 2, 3, 4, 5, 6, 7, 8}  # all possible directions
     else:
         directions = {1, 3, 5, 7}

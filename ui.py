@@ -13,7 +13,7 @@ def _decorate_button(button: Button, pos: tuple, cars: list):
     button.text = f'{pos}\n    {len(cars)}'
     button.background_color = config.GREEN
     for car in cars:
-        if config.CONSTANT_SOURCE_THROUGHOUT:
+        if config.CONST_NUM_OF_SOURCE:
             if car["when"] > 0:
                 button.background_color = config.BLUE
             elif car["when"] == 0:
@@ -30,8 +30,8 @@ class Grid(GridLayout, App):
         super().__init__()
         self.rows = config.NUM_OF_ROWS
         self.cols = config.NUM_OF_COLS
-        self.phrases = proto.grid_get_states()
-        self.phrase_ctr = -1
+        self.rounds = proto.run_ui()
+        self.round_ctr = -1
 
     def build(self):
         self.add_widgets()
@@ -39,6 +39,7 @@ class Grid(GridLayout, App):
 
     def add_widgets(self):
         phrase = self._get_phrase()
+
         for r in range(config.FIRST_ROW_INDEX, config.FIRST_ROW_INDEX + self.rows):
             for c in range(config.FIRST_COL_INDEX, config.FIRST_COL_INDEX + self.cols):
                 button = Button()
@@ -49,13 +50,18 @@ class Grid(GridLayout, App):
 
     def _get_phrase(self, cmd="next"):
         if cmd == "next":
-            self.phrase_ctr += 1
+            self.round_ctr += 1
         else:
-            self.phrase_ctr -= 1
-        self.phrase_ctr = self.phrase_ctr % len(self.phrases)
-        phrase = self.phrases[self.phrase_ctr]
-        # help_lib.print_grid(phrase)
-        print("self.phrase_ctr", self.phrase_ctr)
+            self.round_ctr -= 1
+        self.round_ctr = self.round_ctr % len(self.rounds)
+        phrase = self.rounds[self.round_ctr][0]
+        broadcasters = self.rounds[self.round_ctr][1]
+
+        print("↓↓round:   ", self.round_ctr)
+        help_lib.report_grid(phrase, broadcasters, 1, False)
+        if self.round_ctr == len(self.rounds) - 1:
+            print(help_lib.get_report(phrase, broadcasters))
+        print("↑↑round:   ", self.round_ctr)
         return phrase
 
     def _on_click(self, instance, touch):
