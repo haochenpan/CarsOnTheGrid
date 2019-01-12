@@ -4,7 +4,7 @@ from kivy.uix.button import Button
 from kivy.config import Config
 import proto
 import config
-import help_lib
+import helplib
 
 Config.set('input', 'mouse', 'mouse, disable_multitouch')
 
@@ -58,9 +58,9 @@ class Grid(GridLayout, App):
         broadcasters = self.rounds[self.round_ctr][1]
 
         print("↓↓round:   ", self.round_ctr)
-        help_lib.report_grid(phrase, broadcasters, 1, False)
+        helplib.report_grid_intermediate(phrase, broadcasters, 1, False)
         if self.round_ctr == len(self.rounds) - 1:
-            print(help_lib.get_report(phrase, broadcasters))
+            print(helplib.report_grid_final(phrase, broadcasters))
         print("↑↑round:   ", self.round_ctr)
         return phrase
 
