@@ -4,8 +4,8 @@ import pickle
 import pprint
 import proto
 import config
-ped = 0.1
-num = 9  # 9 elems per row / col
+ped = 0.2
+num = 4  # 9 elems per row / col
 
 
 def get_plotting_pos(bkt, pos):
@@ -17,8 +17,8 @@ def get_plotting_pos(bkt, pos):
     """
     num_in_the_block = bkt[pos]
     # row_idx starts from 0
-    row_idx = num_in_the_block // num
-    col_idx = num_in_the_block % num
+    row_idx = num_in_the_block % num
+    col_idx = num_in_the_block // num
     # print(pos)
     # print(row_idx, col_idx)
     row_pos = pos[0] + ped + ped * row_idx
@@ -34,6 +34,8 @@ def get_plotting_pos_tbl(grid):
     for round_ctr in range(config.NUM_OF_MOVES + 1):
         for pos, cars in grid.items():
             for car in cars:
+                if round_ctr >= len(car['trace']):
+                    return plotting_pos_tbl
                 grid_pos = car['trace'][round_ctr][1]
                 plot_pos = get_plotting_pos(plotting_pos_bkt[round_ctr], grid_pos)
                 plotting_pos_tbl[round_ctr].append(plot_pos)
