@@ -9,10 +9,10 @@
     Round: A snapshot of cars in the grid. Cars are initiated in the 0th round, NUM_OF_MOVES-th round is the last round.
 """
 """Grid and cars"""
-NUM_OF_ROWS = 20
-NUM_OF_COLS = 20
+NUM_OF_ROWS = 10
+NUM_OF_COLS = 10
 
-NUM_OF_CARS = 1000
+NUM_OF_CARS = 100
 NUM_OF_MOVES = 10
 
 # car movement:

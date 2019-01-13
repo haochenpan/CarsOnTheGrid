@@ -9,6 +9,8 @@ import helplib
 import copy
 import gc
 from pympler.tracker import SummaryTracker
+import json
+import  pickle
 
 
 def move(grid: dict):
@@ -32,7 +34,7 @@ def move(grid: dict):
     return next_grid, next_broadcasters
 
 
-def propagate(curr_round: int, grid: dict, broadcasters: set):
+def propagate(grid: dict, broadcasters: set, curr_round: int):
     for pos in broadcasters:
         for car in grid[pos]:
             if car['when'] == -1:
@@ -50,19 +52,28 @@ def run():
     while round_counter < config.NUM_OF_MOVES and len(broadcasters) < total_blocks:
         round_counter += 1
         grid, broadcasters = move(grid)
-        propagate(round_counter, grid, broadcasters)
+        propagate(grid, broadcasters, round_counter)
     return grid, broadcasters
 
 
 if __name__ == '__main__':
     tracker = SummaryTracker()
-    g, b = run()
-    u, d, l, r, h = 0, 0, 0, 0, 0
+
     # helplib.report_grid_intermediate(g, b, 0, False)
     # helplib.report_grid_intermediate(g, b, 1, True)
     # helplib.report_grid_intermediate(g, b, 3, True)
     # helplib.report_grid_final(g, b)
 
+    # g, b = run()
+    # with open('g.pickle', 'wb') as handle:
+    #     pickle.dump((dict(g), b), handle)
+
+    with open('g.pickle', 'rb') as handle:
+        g, b = pickle.load(handle)
+        print("saved to pickle")
+    # helplib.report_grid_intermediate(g, b, 0, True)
+
+    # u, d, l, r, h = 0, 0, 0, 0, 0
     # for cars in g.values():
     #     for car in cars:
     #         for e in car['trace']:
