@@ -2,7 +2,7 @@ from collections import defaultdict
 from defaultlist import defaultlist
 import pickle
 import pprint
-import proto
+import run_main
 import config
 ped = 0.2
 num = 4  # 9 elems per row / col

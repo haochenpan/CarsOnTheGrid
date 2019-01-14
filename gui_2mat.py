@@ -5,8 +5,8 @@ import matplotlib.text
 import numpy as np
 import pickle
 import time
-import gui2lib
-import helplib
+import gui_2lib
+import run_helplib
 import pprint
 import types
 
@@ -39,8 +39,8 @@ def get_plt():
 pp = pprint.PrettyPrinter(indent=2)
 # with open('g.pickle', 'rb') as handle:
 #     g, b = pickle.load(handle)
-g, b = helplib.init_the_grid()
-t = gui2lib.get_plotting_pos_tbl(g)
+g, b = run_helplib.init_the_grid()
+t = gui_2lib.get_plotting_pos_tbl(g)
 x, y = [], []
 for xc, yc in t[0]:
     # print(xc, yc)
@@ -48,5 +48,5 @@ for xc, yc in t[0]:
     y.append(yc)
 scat = get_plt().scatter(x, y)
 scat.set_alpha(0.8)
-helplib.report_grid_intermediate(g, b, 0, False)
+run_helplib.report_grid_intermediate(g, b, 0, False)
 plt.show()

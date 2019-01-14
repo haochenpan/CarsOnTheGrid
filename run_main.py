@@ -4,8 +4,8 @@ Prototyping Cars On The Grid Problem
 
 from collections import defaultdict
 import config
-import movelib
-import helplib
+import run_movelib
+import run_helplib
 import copy
 import gc
 from pympler.tracker import SummaryTracker
@@ -23,7 +23,7 @@ def move(grid: dict):
             curr_dir_and_pos = car["trace"][-1]
             # print(curr_dir_and_pos)
             # next_dir_and_pos could == ('↓', (1, 0))
-            next_dir_and_pos = movelib.get_new_dir_and_pos(curr_dir_and_pos[1])
+            next_dir_and_pos = run_movelib.get_new_dir_and_pos(curr_dir_and_pos[1])
             car["trace"].append(next_dir_and_pos)
 
             # new_dir_and_pos[1] could == (1, 0)
@@ -48,7 +48,7 @@ def run():
 
     # the dict "grid" only contains blocks that have cars. key: positions (x, y); value: a list of cars in that block
     # the set "broadcasters" always holds positions (x, y) that has at least one broadcaster (or source)
-    grid, broadcasters = helplib.init_the_grid()
+    grid, broadcasters = run_helplib.init_the_grid()
     while round_counter < config.NUM_OF_MOVES and len(broadcasters) < total_blocks:
         round_counter += 1
         grid, broadcasters = move(grid)

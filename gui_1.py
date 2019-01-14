@@ -2,9 +2,9 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.app import App
 from kivy.uix.button import Button
 from kivy.config import Config
-import proto
+import run_main
 import config
-import helplib
+import run_helplib
 
 Config.set('input', 'mouse', 'mouse, disable_multitouch')
 
@@ -30,7 +30,7 @@ class Grid(GridLayout, App):
         super().__init__()
         self.rows = config.NUM_OF_ROWS
         self.cols = config.NUM_OF_COLS
-        self.rounds = proto.run_ui()
+        self.rounds = run_main.run_ui()
         self.round_ctr = -1
 
     def build(self):
@@ -58,9 +58,9 @@ class Grid(GridLayout, App):
         broadcasters = self.rounds[self.round_ctr][1]
 
         print("↓↓round:   ", self.round_ctr)
-        helplib.report_grid_intermediate(phrase, broadcasters, 1, False)
+        run_helplib.report_grid_intermediate(phrase, broadcasters, 1, False)
         if self.round_ctr == len(self.rounds) - 1:
-            print(helplib.report_grid_final(phrase, broadcasters))
+            print(run_helplib.report_grid_final(phrase, broadcasters))
         print("↑↑round:   ", self.round_ctr)
         return phrase
 
