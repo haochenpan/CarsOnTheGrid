@@ -14,34 +14,160 @@ import pickle
 import time
 
 pause = True
-
+forward = True
+round_idx = 0  # init
+frame_idx = 0
+frames = []
 idx = 0
 ctr1, ctr2 = 0, 0
+global_state_ctr = 0
 
 
-def on_click(event):
-    print("pressed")
-    global pause
-    pause ^= True
+def on_click_next(event):
+    global pause, forward
+    global round_idx, frame_idx
+    global global_state_ctr
+    # if pause:
+    #     print("pressed")
+    #     pause = False
+    #     forward = True
+    global_state_ctr += 1
+    forward = True
+
+
+def on_click_prev(event):
+    global pause, forward
+    global round_idx, frame_idx
+    global global_state_ctr
+    # if pause:
+    #     pause = False
+    #     forward = False
+    global_state_ctr += 1
+    forward = False
 
 
 def gen():
-    global idx, ctr1
-    while idx < len(offsets):
-        # time.sleep(0.1)
-        # print("gen called", ctr1)
-        ctr1 += 1
-        yield idx
-        if not pause:
-            idx += 1
-            # idx = idx % len(offsets)
+    global pause, round_idx, frame_idx
+    for i in range(config.NUM_OF_MOVES):
+        while frame_idx < gui_2lib.frames - 1:
+            if not pause:
+                frame_idx += 1
+            yield frame_idx
+        pause = True
+        round_idx += 1
+        frame_idx = 0
+
+
+def gen2():
+    global pause, forward
+    global round_idx, frame_idx, ctr1, ctr2
+    while True:
+        if forward:
+            while frame_idx < gui_2lib.frames - 1:
+                if not pause:
+                    frame_idx += 1
+                print("fwd", ctr1, round_idx, frame_idx)
+                ctr1 += 1
+                yield frame_idx
+                if not forward:
+                    print("bk", round_idx, frame_idx)
+                    break
+            else:
+                pause = True
+                round_idx += 1
+                frame_idx = 0
+        else:
+            print(round_idx, frame_idx)
+            # if pause:
+            #     print("already paused!")
+            round_idx -= 1
+            frame_idx = gui_2lib.frames - 1
+            print(round_idx, frame_idx)
+            while frame_idx >= 0:
+                if not pause:
+                    frame_idx -= 1
+                print("bwd", ctr2, round_idx, frame_idx)
+                ctr2 += 1
+                yield frame_idx
+                if forward:
+                    break
+            else:
+                pause = True
+                round_idx -= 1
+                frame_idx = gui_2lib.frames - 1
+
+
+def gen3():
+    global pause, forward
+    global round_idx, frame_idx, ctr1, ctr2
+    local_state_ctr = 0
+    while True:
+        yield frame_idx
+        if global_state_ctr > local_state_ctr:
+            if forward:
+                while frame_idx < gui_2lib.frames - 1:
+                    frame_idx += 1
+                    yield frame_idx
+                if round_idx < config.NUM_OF_MOVES:
+                    round_idx += 1
+                    frame_idx = 0
+                else:
+                    frame_idx -= 1
+            else:
+                round_idx -= 1
+                frame_idx = gui_2lib.frames - 1
+                while frame_idx > 0:
+                    frame_idx -= 1
+                    yield frame_idx
+            print(round_idx, frame_idx)
+            local_state_ctr = global_state_ctr
+
+
+def gen4():
+    global global_state_ctr, forward
+    global frame_idx, round_idx
+    local_state_ctr = 0
+
+    while True:
+        yield frame_idx
+        if global_state_ctr > local_state_ctr:
+            if forward:
+                if round_idx == config.NUM_OF_MOVES - 1:
+                    print("fwd long dist!")
+                    round_idx, frame_idx = 0, 0
+                else:
+                    if frame_idx > 0:
+                        round_idx += 1
+                        frame_idx = 0
+                    while frame_idx < gui_2lib.frames - 1:
+                        frame_idx += 1
+                        yield frame_idx
+            else:
+                if frame_idx == 0:
+                    print("bck long dist!")
+                    round_idx = config.NUM_OF_MOVES - 1
+                    frame_idx = gui_2lib.frames - 1
+                else:
+                    while frame_idx > 0:
+                        frame_idx -= 1
+                        yield frame_idx
+                    if round_idx == 0:
+                        pass
+                    else:
+                        round_idx -= 1
+                        frame_idx = gui_2lib.frames - 1
+
+            assert frame_idx in {0, gui_2lib.frames - 1}
+            local_state_ctr += 1
+            print(round_idx, frame_idx)
+
 
 
 def _update(idx):
-    global ctr2
+    # global ctr2
     # print("update called", ctr2)
-    ctr2 += 1
-    scat.set_offsets(offsets[idx])
+    # ctr2 += 1
+    scat.set_offsets(frames[round_idx][frame_idx])
 
 
 def get_plt():
@@ -83,25 +209,11 @@ if __name__ == '__main__':
     pos_tbl = gui_2lib.get_plotting_pos_tbl(g)
     ls_tbl = gui_2lib.get_ls_tbl(pos_tbl)
     stack_tbl = gui_2lib.get_stack_tbl(ls_tbl)
+    # offsets = stack_tbl[0]
 
-    offsets = stack_tbl[0]
-    # for each in pos_tbl[0]:
-    #     print(each)
-    # print()
-    # print()
-    # print()
-    # for each in offsets:
-    #     print(each[0])
-
-    # ctr_dict = defaultdict(lambda: 0)
-    # for each in pos_tbl[0]:
-    #     ctr_dict[(int(each[0]), int(each[1]))] += 1
-    # for k, v in ctr_dict.items():
-    #     print(k, v)
-
-    # print(pos_tbl[0][2], pos_tbl[1][2])
-    # print(ls_tbl[0][2])
-
+    frames = stack_tbl
+    print(len(frames))
+    print(len(frames[0]))
     x, y = [], []
     for xc, yc in pos_tbl[0]:
         # print(xc, yc)
@@ -112,8 +224,11 @@ if __name__ == '__main__':
     scat = plt.scatter(x, y)
     scat.set_alpha(0.8)
 
-    anim = animation.FuncAnimation(fig, _update, gen, blit=False, interval=5, repeat=False)
-    axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
+    anim = animation.FuncAnimation(fig, _update, gen4, blit=False, interval=5, repeat=False)
+    axprev = plt.axes([0.8, 0, 0.1, 0.075])
+    axnext = plt.axes([0.9, 0, 0.1, 0.075])
+    bprev = Button(axprev, 'Prev')
     bnext = Button(axnext, 'Next')
-    bnext.on_clicked(on_click)
+    bprev.on_clicked(on_click_prev)
+    bnext.on_clicked(on_click_next)
     plt.show()

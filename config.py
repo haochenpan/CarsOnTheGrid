@@ -12,16 +12,16 @@
 NUM_OF_ROWS = 10
 NUM_OF_COLS = 10
 
-NUM_OF_CARS = 100
-NUM_OF_MOVES = 10
+NUM_OF_CARS = 300
+NUM_OF_MOVES = 4
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
 ALLOW_STANDING = True
 
 """Preferences"""
-FIRST_ROW_INDEX = 1  # 0 or 1
-FIRST_COL_INDEX = 1
+FIRST_ROW_INDEX = 0  # 0 or 1
+FIRST_COL_INDEX = 0
 FIRST_CAR_INDEX = 0
 
 
