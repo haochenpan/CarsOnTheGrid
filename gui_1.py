@@ -58,9 +58,9 @@ class Grid(GridLayout, App):
         broadcasters = self.rounds[self.round_ctr][1]
 
         print("↓↓round:   ", self.round_ctr)
-        run_helplib.report_grid_intermediate(phrase, broadcasters, 1, False)
+        run_helplib.print_grid(phrase, broadcasters, 1, False)
         if self.round_ctr == len(self.rounds) - 1:
-            print(run_helplib.report_grid_final(phrase, broadcasters))
+            print(run_helplib.report_grid(phrase, broadcasters))
         print("↑↑round:   ", self.round_ctr)
         return phrase
 

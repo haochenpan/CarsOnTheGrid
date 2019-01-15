@@ -50,7 +50,7 @@ def init_the_grid():
     return grid, source_pos
 
 
-def report_grid_intermediate(grid: dict, broadcasters: set, mode: int = 0, trace: bool = False):
+def print_grid(grid: dict, broadcasters: set, mode: int = 0, trace: bool = False):
     """
 
     :param grid:
@@ -64,7 +64,7 @@ def report_grid_intermediate(grid: dict, broadcasters: set, mode: int = 0, trace
     :return:
     """
 
-    def report_idx_and_pos(idx: int, pos: tuple):
+    def print_idx_and_pos(idx: int, pos: tuple):
         """
 
         :param idx: an integer, the index of the enumeration
@@ -73,7 +73,7 @@ def report_grid_intermediate(grid: dict, broadcasters: set, mode: int = 0, trace
         """
         print(f'{idx: 5d}: ({pos[0]: 3d}, {pos[1]: 3d})', end='   ')
 
-    def report_a_car_wo_trace(car: dict):
+    def print_a_car_wo_trace(car: dict):
         """
         Print a car without its trace
         :param car:
@@ -81,38 +81,38 @@ def report_grid_intermediate(grid: dict, broadcasters: set, mode: int = 0, trace
         """
         print(f' id:{car["id"]: 3d}, when:{car["when"]: 3d}', end='   ')
 
-    def report_all_cars(idx: int, pos: tuple, cars: list):
+    def print_all_cars(idx: int, pos: tuple, cars: list):
         if trace:
             print(f'{idx: 5d}: ({pos[0]: 3d}, {pos[1]: 3d})   {cars}')
         else:
-            report_idx_and_pos(idx, pos)
+            print_idx_and_pos(idx, pos)
             for car in cars:
-                report_a_car_wo_trace(car)
+                print_a_car_wo_trace(car)
             print()
 
     # print('\n\n')
     print(f'--report mode:{mode}')
     if mode == 0:
         for idx, (pos, cars) in enumerate(grid.items()):
-            report_all_cars(idx, pos, cars)
+            print_all_cars(idx, pos, cars)
     elif mode in {1, 2}:
         for idx, pos in enumerate(broadcasters):
             # all cars in the set are broadcasters
-            report_all_cars(idx, pos, grid[pos])
+            print_all_cars(idx, pos, grid[pos])
     else:
         for idx, pos in enumerate(broadcasters):
             for car in grid[pos]:
                 if car['when'] == 0:
                     if mode == 3:
-                        report_all_cars(idx, pos, grid[pos])
+                        print_all_cars(idx, pos, grid[pos])
                     else:  # mode == 4
-                        report_idx_and_pos(idx, pos)
+                        print_idx_and_pos(idx, pos)
                         print(car)
                     return
     # print('\n\n')
 
 
-def report_grid_final(grid: dict, broadcasters: set):
+def report_grid(grid: dict, broadcasters: set):
     """
 
     :param grid: the grid at its final round
@@ -153,6 +153,6 @@ def report_grid_final(grid: dict, broadcasters: set):
 
 if __name__ == '__main__':
     g, b = init_the_grid()
-    print(report_grid_intermediate(g, b, 4, True))
-    report_grid_final(g, b)
+    print(print_grid(g, b, 4, True))
+    report_grid(g, b)
     pass

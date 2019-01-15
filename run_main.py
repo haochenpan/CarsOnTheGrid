@@ -10,7 +10,7 @@ import copy
 import gc
 from pympler.tracker import SummaryTracker
 import json
-import  pickle
+import pickle
 
 
 def move(grid: dict):
@@ -49,20 +49,27 @@ def run():
     # the dict "grid" only contains blocks that have cars. key: positions (x, y); value: a list of cars in that block
     # the set "broadcasters" always holds positions (x, y) that has at least one broadcaster (or source)
     grid, broadcasters = run_helplib.init_the_grid()
+    # run_helplib.print_grid(grid, broadcasters, 0, False)
+    # print()
+    # print()
+    # print()
     while round_counter < config.NUM_OF_MOVES and len(broadcasters) < total_blocks:
         round_counter += 1
         grid, broadcasters = move(grid)
         propagate(grid, broadcasters, round_counter)
+        # if round_counter in {1}:
+            # run_helplib.print_grid(grid, broadcasters, 0, False)
+
     return grid, broadcasters
 
 
 if __name__ == '__main__':
     tracker = SummaryTracker()
 
-    # helplib.report_grid_intermediate(g, b, 0, False)
-    # helplib.report_grid_intermediate(g, b, 1, True)
-    # helplib.report_grid_intermediate(g, b, 3, True)
-    # helplib.report_grid_final(g, b)
+    # helplib.print_grid(g, b, 0, False)
+    # helplib.print_grid(g, b, 1, True)
+    # helplib.print_grid(g, b, 3, True)
+    # helplib.report_grid(g, b)
 
     # g, b = run()
     # with open('g.pickle', 'wb') as handle:
@@ -71,7 +78,7 @@ if __name__ == '__main__':
     with open('g.pickle', 'rb') as handle:
         g, b = pickle.load(handle)
         print("saved to pickle")
-    # helplib.report_grid_intermediate(g, b, 0, True)
+    # helplib.print_grid(g, b, 0, True)
 
     # u, d, l, r, h = 0, 0, 0, 0, 0
     # for cars in g.values():
