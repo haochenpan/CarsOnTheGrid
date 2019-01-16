@@ -72,10 +72,10 @@ def run():
 
 if __name__ == '__main__':
 
-    # g, b = run()
-    # with open('g.pickle', 'wb') as handle:
-    #     pickle.dump((dict(g), b), handle)
-    #     print("saved to pickle")
+    g, b = run()
+    with open('run.pickle', 'wb') as handle:
+        pickle.dump((dict(g), b), handle)
+        print("saved to pickle")
 
     # with open('g.pickle', 'rb') as handle:
     #     g, b = pickle.load(handle)

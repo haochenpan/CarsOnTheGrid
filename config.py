@@ -16,15 +16,15 @@
 """
     Common Configs - Grid and cars
 """
-NUM_OF_ROWS = 20
-NUM_OF_COLS = 20
+NUM_OF_ROWS = 30
+NUM_OF_COLS = 30
 
-NUM_OF_CARS = 1000
+NUM_OF_CARS = 2000
 NUM_OF_MOVES = 10
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
-ALLOW_STANDING = True
+ALLOW_STANDING = False
 
 """
     Common Configs - Preferences

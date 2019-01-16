@@ -1,96 +1,16 @@
-"""
-    GUI of CarsOnTheGrid problem
-"""
-from types import MethodType
-from pprint import PrettyPrinter
 from matplotlib.widgets import Button
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import matplotlib.text
-import numpy as np
 import main
 import config
 import helplib
-
-forward = True
-round_idx = 0  # init
-frame_idx = 0
-frames = []
-colors = []
-global_state_ctr = 0
+from types import MethodType
+import matplotlib.text
+import numpy as np
 
 
-def on_click_next(event):
-    global forward, global_state_ctr
-    global_state_ctr += 1
-    forward = True
-
-
-def on_click_prev(event):
-    global forward, global_state_ctr
-    global_state_ctr += 1
-    forward = False
-
-
-def gen():
-    global forward, round_idx, frame_idx, global_state_ctr
-    local_state_ctr = 0
-
-    while True:
-        yield frame_idx
-        if global_state_ctr > local_state_ctr:
-            if forward:
-                # already the final state, but pressed forward
-                if round_idx == config.NUM_OF_MOVES - 1:
-                    round_idx, frame_idx = 0, 0
-                    scat.set_facecolors(colors[0])
-                else:
-                    # if not the very initial state
-                    if frame_idx > 0:
-                        round_idx += 1
-                        frame_idx = 0
-                    # for all states except the the final state
-                    while frame_idx < config.FRAMES - 1:
-                        frame_idx += 1
-                        yield frame_idx
-                    scat.set_facecolors(colors[round_idx + 1])
-            else:
-                # if the very initial state, but pressed backward
-                if frame_idx == 0:
-                    round_idx = config.NUM_OF_MOVES - 1
-                    frame_idx = config.FRAMES - 1
-                    scat.set_facecolors(colors[-1])
-                else:
-                    while frame_idx > 0:
-                        frame_idx -= 1
-                        yield frame_idx
-                    if round_idx > 0:
-                        round_idx -= 1
-                        frame_idx = config.FRAMES - 1
-                        scat.set_facecolors(colors[round_idx + 1])
-                    else:
-                        scat.set_facecolors(colors[0])
-
-            assert frame_idx in {0, config.FRAMES - 1}
-            local_state_ctr += 1
-            print("round and frame:", round_idx, frame_idx)
-
-
-def _update(foo):
-    scat.set_offsets(frames[round_idx][frame_idx])
-
-
-def get_plt():
-    """
-    Get the plotting "canvas" with row, col axes and grid lines
-    :return:
-    """
-    fig = plt.figure(figsize=(12, 12))
-    # fig.canvas.mpl_connect('button_press_event', on_click)
-
+def draw_axis(ax):
     # draw axis
-    ax = fig.add_subplot(111, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
-                         ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
     ax.grid(b=True)
     ax.xaxis.tick_top()
     ax.set_xticks(np.arange(config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1, 1))
@@ -109,37 +29,109 @@ def get_plt():
         lbl.set_y = MethodType(lambda self, y:
                                matplotlib.text.Text.set_y(self, y - self.customShiftValue), lbl)
 
-    return plt, fig
+
+class GUI(object):
+    def __init__(self):
+        self.forward = True
+        self.round_idx = 0
+        self.frame_idx = 0
+        self.global_state_ctr = 0
+        self.grid, self.broadcaster = main.run()
+        pos_tbl = helplib.get_plotting_pos_tbl(self.grid)
+        self.frames = helplib.get_ls_tbl(pos_tbl)
+        self.colors = helplib.get_color_tbl(self.grid)
+        self.source_pos_tbl = helplib.get_source_pos_tbl(self.grid)
+        x, y = [], []
+        for xc, yc in pos_tbl[0]:
+            x.append(xc)
+            y.append(yc)
+
+        self.fig = plt.figure(figsize=(18, 9))
+        ax = self.fig.add_subplot(121, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
+                                  ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
+        draw_axis(ax)
+        self.scat = plt.scatter(x, y, c=self.colors[0], alpha=0.8)
+
+        self.ax = self.fig.add_subplot(122, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
+                                       ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
+        draw_axis(self.ax)
+        # self.scat2 = plt.scatter(x, y, c=self.colors[0], alpha=0.8)
+
+    def on_click_next(self, event):
+        self.global_state_ctr += 1
+        self.forward = True
+
+    def on_click_prev(self, event):
+        self.global_state_ctr += 1
+        self.forward = False
+
+    def _update(self, foo):
+        self.scat.set_offsets(self.frames[self.round_idx][self.frame_idx])
+
+    def gen(self):
+        local_state_ctr = 0
+
+        while True:
+            yield self.frame_idx
+            if self.global_state_ctr > local_state_ctr:
+                if self.forward:
+                    # already the final state, but pressed forward
+                    if self.round_idx == config.NUM_OF_MOVES - 1:
+                        self.round_idx, self.frame_idx = 0, 0
+                        self.scat.set_facecolors(self.colors[0])
+                        self.ax.lines = []
+                    else:
+                        # if not the very initial state
+                        if self.frame_idx > 0:
+                            self.round_idx += 1
+                            self.frame_idx = 0
+
+                        # for all states except the the final state
+                        while self.frame_idx < config.FRAMES - 1:
+                            self.frame_idx += 1
+                            yield self.frame_idx
+                        self.scat.set_facecolors(self.colors[self.round_idx + 1])
+                        self.ax.plot(self.source_pos_tbl[0][self.round_idx: self.round_idx + 2],
+                                     self.source_pos_tbl[1][self.round_idx: self.round_idx + 2], 'r--')
+
+                else:
+                    # if the very initial state, but pressed backward
+                    if self.frame_idx == 0:
+                        self.round_idx = config.NUM_OF_MOVES - 1
+                        self.frame_idx = config.FRAMES - 1
+                        self.scat.set_facecolors(self.colors[-1])
+                        for move in range(config.NUM_OF_MOVES):
+                            self.ax.plot(self.source_pos_tbl[0][move: move + 2],
+                                         self.source_pos_tbl[1][move: move + 2], 'r--')
+                    else:
+                        while self.frame_idx > 0:
+                            self.frame_idx -= 1
+                            yield self.frame_idx
+                        if self.round_idx > 0:
+                            self.round_idx -= 1
+                            self.frame_idx = config.FRAMES - 1
+                            self.scat.set_facecolors(self.colors[self.round_idx + 1])
+                        else:
+                            self.scat.set_facecolors(self.colors[0])
+                        self.ax.lines.pop()
+
+                assert self.frame_idx in {0, config.FRAMES - 1}
+                local_state_ctr += 1
+                print("round and frame:", self.round_idx, self.frame_idx)
+
+    def show(self):
+        anim = animation.FuncAnimation(self.fig, self._update, self.gen, interval=1, repeat=False)
+        axprev = plt.axes([0.8, 0, 0.1, 0.075])
+        axnext = plt.axes([0.9, 0, 0.1, 0.075])
+        bprev = Button(axprev, 'Prev')
+        bnext = Button(axnext, 'Next')
+        bprev.on_clicked(self.on_click_prev)
+        bnext.on_clicked(self.on_click_next)
+        plt.show()
 
 
 if __name__ == '__main__':
-    pp = PrettyPrinter(indent=2)
-    g, b = main.run()
-
-    pos_tbl = helplib.get_plotting_pos_tbl(g)
-    ls_tbl = helplib.get_ls_tbl(pos_tbl)
-    stack_tbl = helplib.get_stack_tbl(ls_tbl)
-    # offsets = stack_tbl[0]
-
-    frames = stack_tbl
-    colors = helplib.get_color_tbl(g)
-    print(len(frames))
-    print(len(frames[0]))
-    x, y = [], []
-    for xc, yc in pos_tbl[0]:
-        # print(xc, yc)
-        x.append(xc)
-        y.append(yc)
-
-    plt, fig = get_plt()
-    scat = plt.scatter(x, y, c=colors[0])
-    scat.set_alpha(0.8)
-
-    anim = animation.FuncAnimation(fig, _update, gen, interval=1, repeat=False)
-    axprev = plt.axes([0.8, 0, 0.1, 0.075])
-    axnext = plt.axes([0.9, 0, 0.1, 0.075])
-    bprev = Button(axprev, 'Prev')
-    bnext = Button(axnext, 'Next')
-    bprev.on_clicked(on_click_prev)
-    bnext.on_clicked(on_click_next)
-    plt.show()
+    gui = GUI()
+    gui.show()
+    # g, b = main.run()
+    # print(helplib.get_source_pos_tbl(g))

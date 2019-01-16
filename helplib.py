@@ -296,17 +296,13 @@ def get_ls_tbl(plotting_pos_tbl: list):
 
     assert len(ls_tbl) == config.NUM_OF_MOVES, "each elem of the list is for a move's animation"
     assert len(ls_tbl[0]) == config.NUM_OF_CARS, "need to move that many of cars in each animation"
-    return ls_tbl
 
+    """
+        the above function call gives a 4D array that each entry of the inner 3D array
+        represents a car's all point-in-time positions, but we need to "stack" them in
+        a way that each entry represents all cars' positions at a point-in-time
+    """
 
-def get_stack_tbl(ls_tbl: list):
-    """
-    ls_tbl() function call gives a 4D array that each entry of the inner 3D array
-    represents a car's all point-in-time positions, but we need to "stack" them in
-    a way that each entry represents all cars' positions at a point-in-time
-    :param ls_tbl:
-    :return:
-    """
     stack_tbl = []
     for each in ls_tbl:
         stack_tbl.append(np.stack(each, axis=1))
@@ -334,6 +330,29 @@ def get_color_tbl(grid: dict):
     assert len(color_tbl) == config.NUM_OF_MOVES + 1, ""
     assert len(color_tbl[0]) == config.NUM_OF_CARS, ""
     return color_tbl
+
+
+def get_source_pos(pos: tuple, bkt: dict) -> tuple:
+    num_in_the_block = bkt[pos]
+    row_pos = pos[0] + config.PADDING + config.PADDING * num_in_the_block
+    col_pos = pos[1] + config.PADDING + config.PADDING * num_in_the_block
+    bkt[pos] += 1
+    return row_pos, col_pos
+
+
+def get_source_pos_tbl(grid: dict):
+    source_pos_tbl = []
+    source_pos_bkt = defaultdict(lambda: 0)
+    for pos, cars in grid.items():
+        for car in cars:
+            if car['when'] == 0:
+                for round_idx in range(config.NUM_OF_MOVES + 1):
+                    grid_pos = car['trace'][round_idx][1]
+                    plot_pos = get_source_pos(grid_pos, source_pos_bkt)
+                    source_pos_tbl.append(plot_pos)
+                source_pos_tbl = np.stack(source_pos_tbl, axis=1)
+                return source_pos_tbl
+    assert False, "sanity check"
 
 
 if __name__ == '__main__':
