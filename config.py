@@ -16,10 +16,10 @@
 """
     Common Configs - Grid and cars
 """
-NUM_OF_ROWS = 30
-NUM_OF_COLS = 30
+NUM_OF_ROWS = 10
+NUM_OF_COLS = 10
 
-NUM_OF_CARS = 2000
+NUM_OF_CARS = 500
 NUM_OF_MOVES = 10
 
 # car movement:
