@@ -205,6 +205,7 @@ def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
     GUI Helper Library
 """
 
+
 def get_plotting_pos(pos: tuple, bkt: dict) -> tuple:
     """
     Transform a grid position (3, 4) to a plotting position (3.4, 4.2) based on the number of items in that block
@@ -249,13 +250,39 @@ def get_plotting_pos_tbl(grid):
 
 
 def get_ls(pos1, pos2):
-    ls_x = np.linspace(pos1[0], pos2[0], num=config.FRAMES, dtype=np.float16)  # no need such precision, and optimize mem usage
+    """
+    Gets an 2D array of positions for the animation,
+    and each entry of the 2D array is an 1D array that represents a coordinate [x, y],
+    The first entry is [pos1_x, pos1_y];
+    The second entry is [pos1_x + delta_x, pos1_y + delta_y],
+    where delta_x = (pos2_x - pos1_x)/config.FRAMES, deltas could be a negative float;
+    So on so forth... and the last entry is [pos2_x, pos2_y]
+    :param pos1:
+    :param pos2:
+    :return:
+    """
+    ls_x = np.linspace(pos1[0], pos2[0], num=config.FRAMES,
+                       dtype=np.float16)  # no need such precision, and optimize mem usage
     ls_y = np.linspace(pos1[1], pos2[1], num=config.FRAMES, dtype=np.float16)
     ls = np.column_stack((ls_x, ls_y))
     return ls
 
 
 def get_ls_tbl(plotting_pos_tbl: list):
+    """
+    Gets an 4D array that includes every position needed
+    for every dot(car) on the grid during every the animation.
+    Outermost dimension has config.NUM_OF_MOVES elements,
+    each element represents all positions used by all cars in a round
+
+    The next dimension has config.NUM_OF_CARS elements,
+    each element represents all positions used for a car in a round
+
+    The inner two dimensions are merely output of get_ls() function call.
+
+    :param plotting_pos_tbl: A valid output of get_plotting_pos_tbl() function call
+    :return:
+    """
     ls_tbl = defaultlist(lambda: defaultlist(lambda: []))
     assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
     for round_idx in range(config.NUM_OF_MOVES):  # only need NUM_OF_MOVES of transitions
@@ -273,10 +300,41 @@ def get_ls_tbl(plotting_pos_tbl: list):
 
 
 def get_stack_tbl(ls_tbl: list):
+    """
+    ls_tbl() function call gives a 4D array that each entry of the inner 3D array
+    represents a car's all point-in-time positions, but we need to "stack" them in
+    a way that each entry represents all cars' positions at a point-in-time
+    :param ls_tbl:
+    :return:
+    """
     stack_tbl = []
     for each in ls_tbl:
         stack_tbl.append(np.stack(each, axis=1))
     return stack_tbl
+
+
+def get_colors(car: dict):
+    when = car['when']
+    if when == -1:
+        return ['b' for i in range(config.NUM_OF_MOVES + 1)]
+    elif when == 0:
+        return ['r' for i in range(config.NUM_OF_MOVES + 1)]
+    else:
+        colors = ['b' for i in range(when)]
+        colors.extend(['y' for i in range(config.NUM_OF_MOVES + 1 - when)])
+        return colors
+
+
+def get_color_tbl(grid: dict):
+    color_tbl = []
+    for p, cs in grid.items():
+        for c in cs:
+            color_tbl.append(get_colors(c))
+    color_tbl = np.stack(color_tbl, axis=1)
+    assert len(color_tbl) == config.NUM_OF_MOVES + 1, ""
+    assert len(color_tbl[0]) == config.NUM_OF_CARS, ""
+    return color_tbl
+
 
 if __name__ == '__main__':
     pass

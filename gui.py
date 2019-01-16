@@ -16,6 +16,7 @@ forward = True
 round_idx = 0  # init
 frame_idx = 0
 frames = []
+colors = []
 global_state_ctr = 0
 
 
@@ -32,7 +33,6 @@ def on_click_prev(event):
 
 
 def gen():
-
     global forward, round_idx, frame_idx, global_state_ctr
     local_state_ctr = 0
 
@@ -40,38 +40,43 @@ def gen():
         yield frame_idx
         if global_state_ctr > local_state_ctr:
             if forward:
+                # already the final state, but pressed forward
                 if round_idx == config.NUM_OF_MOVES - 1:
-                    print("fwd long dist!")
                     round_idx, frame_idx = 0, 0
+                    scat.set_facecolors(colors[0])
                 else:
+                    # if not the very initial state
                     if frame_idx > 0:
                         round_idx += 1
                         frame_idx = 0
+                    # for all states except the the final state
                     while frame_idx < config.FRAMES - 1:
                         frame_idx += 1
                         yield frame_idx
+                    scat.set_facecolors(colors[round_idx + 1])
             else:
+                # if the very initial state, but pressed backward
                 if frame_idx == 0:
-                    print("bck long dist!")
                     round_idx = config.NUM_OF_MOVES - 1
                     frame_idx = config.FRAMES - 1
+                    scat.set_facecolors(colors[-1])
                 else:
                     while frame_idx > 0:
                         frame_idx -= 1
                         yield frame_idx
-                    if round_idx == 0:
-                        pass
-                    else:
+                    if round_idx > 0:
                         round_idx -= 1
                         frame_idx = config.FRAMES - 1
+                        scat.set_facecolors(colors[round_idx + 1])
+                    else:
+                        scat.set_facecolors(colors[0])
 
             assert frame_idx in {0, config.FRAMES - 1}
             local_state_ctr += 1
-            print(round_idx, frame_idx)
+            print("round and frame:", round_idx, frame_idx)
 
 
 def _update(foo):
-    print(foo)
     scat.set_offsets(frames[round_idx][frame_idx])
 
 
@@ -80,7 +85,7 @@ def get_plt():
     Get the plotting "canvas" with row, col axes and grid lines
     :return:
     """
-    fig = plt.figure(figsize=(10, 10))
+    fig = plt.figure(figsize=(12, 12))
     # fig.canvas.mpl_connect('button_press_event', on_click)
 
     # draw axis
@@ -117,6 +122,7 @@ if __name__ == '__main__':
     # offsets = stack_tbl[0]
 
     frames = stack_tbl
+    colors = helplib.get_color_tbl(g)
     print(len(frames))
     print(len(frames[0]))
     x, y = [], []
@@ -126,10 +132,10 @@ if __name__ == '__main__':
         y.append(yc)
 
     plt, fig = get_plt()
-    scat = plt.scatter(x, y)
+    scat = plt.scatter(x, y, c=colors[0])
     scat.set_alpha(0.8)
 
-    anim = animation.FuncAnimation(fig, _update, gen, blit=False, interval=5, repeat=False)
+    anim = animation.FuncAnimation(fig, _update, gen, interval=1, repeat=False)
     axprev = plt.axes([0.8, 0, 0.1, 0.075])
     axnext = plt.axes([0.9, 0, 0.1, 0.075])
     bprev = Button(axprev, 'Prev')

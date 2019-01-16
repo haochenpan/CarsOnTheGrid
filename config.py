@@ -2,7 +2,6 @@
     Program descriptions, configurations and validations
 """
 
-
 """
     Definitions and terminologies (Version 01/11/2019, according to the email discussion):
         Source:         The first car holds the message, generate at the run time,
@@ -14,20 +13,18 @@
                         and NUM_OF_MOVES-th round is the last round.
 """
 
-
 """
     Common Configs - Grid and cars
 """
-NUM_OF_ROWS = 10
-NUM_OF_COLS = 10
+NUM_OF_ROWS = 20
+NUM_OF_COLS = 20
 
-NUM_OF_CARS = 300
-NUM_OF_MOVES = 4
+NUM_OF_CARS = 1000
+NUM_OF_MOVES = 10
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
-ALLOW_STANDING = False
-
+ALLOW_STANDING = True
 
 """
     Common Configs - Preferences
@@ -36,14 +33,12 @@ FIRST_ROW_INDEX = 0  # 0 or 1
 FIRST_COL_INDEX = 0
 FIRST_CAR_INDEX = 0
 
-
 """
     GUI Configs
 """
-PADDING = 0.2
-COUNT_PER_ROW_COL = 4  # 9 elems per row / col
+PADDING = 0.1  # 0.1/0.2
+COUNT_PER_ROW_COL = 9  # 9/4 elems per row / col
 FRAMES = 30
-
 
 """
     (Do not modify) Frequently Used Variables and Validations
