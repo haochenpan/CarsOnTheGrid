@@ -1,14 +1,23 @@
 """
-    Program configurations and validations
+    Program descriptions, configurations and validations
 """
+
+
 """
     Definitions and terminologies (Version 01/11/2019, according to the email discussion):
-    Source: The first car holds the message, generate at the run time, has id = FIRST_CAR_INDEX.
-    Broadcaster: If a car holds the message, it is a broadcaster. The source is the first broadcaster.
-    Receiver: same as broadcaster.
-    Round: A snapshot of cars in the grid. Cars are initiated in the 0th round, NUM_OF_MOVES-th round is the last round.
+        Source:         The first car holds the message, generate at the run time,
+                        has id = FIRST_CAR_INDEX.
+        Broadcaster:    If a car holds the message, it is a broadcaster.
+                        The source is the first broadcaster.
+        Receiver:       The same as broadcaster.
+        Round:          A snapshot of cars in the grid. Cars are initiated in the 0th round,
+                        and NUM_OF_MOVES-th round is the last round.
 """
-"""Grid and cars"""
+
+
+"""
+    Common Configs - Grid and cars
+"""
 NUM_OF_ROWS = 10
 NUM_OF_COLS = 10
 
@@ -17,28 +26,28 @@ NUM_OF_MOVES = 4
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
-ALLOW_STANDING = True
+ALLOW_STANDING = False
 
-"""Preferences"""
+
+"""
+    Common Configs - Preferences
+"""
 FIRST_ROW_INDEX = 0  # 0 or 1
 FIRST_COL_INDEX = 0
 FIRST_CAR_INDEX = 0
 
 
-# [4|8] = [4|8] directions available, 4 = {↑, ↓, ←, →} and 8 = {↑, ↓, ←, →, ↖, ↗, ↙, ↘}
-# NUM_OF_DIRS = 4
+"""
+    GUI Configs
+"""
+PADDING = 0.2
+COUNT_PER_ROW_COL = 4  # 9 elems per row / col
+FRAMES = 30
 
-# [True|False] = [Cannot|Can] have multiple sources in the first grid
-# HAS_SINGLE_SOURCE = False
 
-# [True|False] = Cars in the same block with source(s)
-# [Cannot become a source, just a receiver | Can let others receive the message and become a source]
-# CONST_NUM_OF_SOURCE = False
-
-# ["restricted"|"not-restricted"]
-# "restricted": if at border, won't generate the option to move toward the border again
-# "not-restricted":
-# BORDER_BEHAVIOR = "restricted"
+"""
+    (Do not modify) Frequently Used Variables and Validations
+"""
 
 LAST_ROW_INDEX = NUM_OF_ROWS + FIRST_ROW_INDEX - 1
 LAST_COL_INDEX = NUM_OF_COLS + FIRST_COL_INDEX - 1
@@ -49,4 +58,3 @@ BLUE = [0.5 * 2, 1.0 * 2, 1.0 * 2, 1.0 * 2]
 
 assert NUM_OF_CARS >= 2, "need at least 2 cars, one is the source and one is not"
 assert NUM_OF_ROWS * NUM_OF_COLS >= 2, "need at least 2 blocks to store the source and other cars"
-
