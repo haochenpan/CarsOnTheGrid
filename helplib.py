@@ -22,7 +22,7 @@ def get_rand_pos():
     return r, c
 
 
-def init_a_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
+def init_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
     """
     Initiates a car, may use many times in the 0th round
     :param car_id:
@@ -37,8 +37,8 @@ def init_a_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
         "trace": [("s", car_pos)]
     }
 
-
-def init_the_grid():
+# covered in unittest
+def init_grid():
     """
     Initiates the grid, may use once in the 0th round
     :return: A dictionary representation of a grid object
@@ -48,7 +48,7 @@ def init_the_grid():
 
     # generate the source car, id = FIRST_CAR_INDEX
     source_pos = get_rand_pos()
-    source_car = init_a_car(config.FIRST_CAR_INDEX, source_pos, when=0)
+    source_car = init_car(config.FIRST_CAR_INDEX, source_pos, when=0)
     grid[source_pos].append(source_car)
 
     # generate other cars, ids in [FIRST_CAR_INDEX + 1, NUM_OF_CARS + FIRST_CAR_INDEX - 1]
@@ -57,7 +57,7 @@ def init_the_grid():
         # ensure single source
         while pos == source_pos:
             pos = get_rand_pos()
-        car = init_a_car(i, pos)
+        car = init_car(i, pos)
         grid[pos].append(car)
 
     return grid, source_pos

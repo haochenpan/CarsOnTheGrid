@@ -62,7 +62,7 @@ def run():
     # key: positions (x, y); value: a list of cars in that block
     # the set "broadcasters" always holds positions (x, y)
     # that has at least one broadcaster (or source)
-    grid, broadcasters = helplib.init_the_grid()
+    grid, broadcasters = helplib.init_grid()
     while round_counter < config.NUM_OF_MOVES and len(broadcasters) < total_blocks:
         round_counter += 1
         grid, broadcasters = move(grid)
