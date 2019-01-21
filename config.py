@@ -26,15 +26,15 @@
 """
     Common Configs - Grid and cars
 """
-NUM_OF_ROWS = 10
-NUM_OF_COLS = 10
+NUM_OF_ROWS = 20
+NUM_OF_COLS = 20
 
 NUM_OF_CARS = 1000
-NUM_OF_MOVES = 10  # TODO(Haochen): need more assertions on this
+NUM_OF_MOVES = 10
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
-ALLOW_STANDING = False
+ALLOW_STANDING = True
 
 """
     Common Configs - Preferences

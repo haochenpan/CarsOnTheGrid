@@ -7,9 +7,12 @@ import helplib
 from types import MethodType
 import matplotlib.text
 import numpy as np
+import pickle
+
+t = "config and round info"
 
 
-def draw_axis(ax):
+def adjust_axis(ax):
     # draw axis
     ax.grid(b=True)
     ax.xaxis.tick_top()
@@ -36,7 +39,9 @@ class GUI(object):
         self.round_idx = 0
         self.frame_idx = 0
         self.global_state_ctr = 0
-        self.grid, self.broadcaster = main.run()
+        self.grid, self.broadcaster, self.stats = main.run()
+        # with open('run.pickle', 'rb') as handle:
+        #     self.grid, self.broadcaster, self.stats = pickle.load(handle)
         pos_tbl = helplib.get_plotting_pos_tbl(self.grid)
         self.frames = helplib.get_ls_tbl(pos_tbl)
         self.colors = helplib.get_color_tbl(self.grid)
@@ -49,13 +54,21 @@ class GUI(object):
         self.fig = plt.figure(figsize=(18, 9))
         ax = self.fig.add_subplot(121, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
                                   ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
-        draw_axis(ax)
+        adjust_axis(ax)
+        # handler to the first plot
         self.scat = plt.scatter(x, y, c=self.colors[0], alpha=0.8)
 
+        # handler to the second plot
         self.ax = self.fig.add_subplot(122, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
                                        ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
-        draw_axis(self.ax)
-        # self.scat2 = plt.scatter(x, y, c=self.colors[0], alpha=0.8)
+        adjust_axis(self.ax)
+        self.ax.text(config.LAST_ROW_INDEX + 1.5, 0, "Configurations:")
+        self.ax.text(config.LAST_ROW_INDEX + 1.5, 0.5, f"Num of rows {config.NUM_OF_ROWS}")
+        self.ax.text(config.LAST_ROW_INDEX + 1.5, 1, f"Num of cols {config.NUM_OF_COLS}")
+        self.ax.text(config.LAST_ROW_INDEX + 1.5, 1.5, f"Num of cars {config.NUM_OF_CARS}")
+        self.ax.text(config.LAST_ROW_INDEX + 1.5, 2, f"allow standing {config.ALLOW_STANDING}")
+        self.ax.text(0, config.LAST_COL_INDEX + 1.5, "Runtime info:")
+        self.ax.text(0, config.LAST_COL_INDEX + 2, f"Round: {0} out of {len(self.stats) - 1}, Grid: {1}, Cars: {1}")
 
     def on_click_next(self, event):
         self.global_state_ctr += 1
@@ -76,10 +89,17 @@ class GUI(object):
             if self.global_state_ctr > local_state_ctr:
                 if self.forward:
                     # already the final state, but pressed forward
-                    if self.round_idx == config.NUM_OF_MOVES - 1:
+                    # if self.round_idx == config.NUM_OF_MOVES - 1:
+                    if self.round_idx == len(self.stats) - 2:
                         self.round_idx, self.frame_idx = 0, 0
                         self.scat.set_facecolors(self.colors[0])
                         self.ax.lines = []
+                        self.ax.texts.pop()
+                        self.ax.text(0, config.LAST_COL_INDEX + 2,
+                                     f"Round: {self.stats[self.round_idx][0]} out of {len(self.stats) - 1},"
+                                     f" Grid: {self.stats[self.round_idx][1]},"
+                                     f" Cars: {self.stats[self.round_idx][2]}")
+
                     else:
                         # if not the very initial state
                         if self.frame_idx > 0:
@@ -93,31 +113,55 @@ class GUI(object):
                         self.scat.set_facecolors(self.colors[self.round_idx + 1])
                         self.ax.plot(self.source_pos_tbl[0][self.round_idx: self.round_idx + 2],
                                      self.source_pos_tbl[1][self.round_idx: self.round_idx + 2], 'r--')
+                        self.ax.texts.pop()
+                        self.ax.text(0, config.LAST_COL_INDEX + 2,
+                                     f"Round: {self.stats[self.round_idx + 1][0]} out of {len(self.stats) - 1},"
+                                     f" Grid: {self.stats[self.round_idx + 1][1]},"
+                                     f" Cars: {self.stats[self.round_idx + 1][2]}")
 
                 else:
                     # if the very initial state, but pressed backward
                     if self.frame_idx == 0:
-                        self.round_idx = config.NUM_OF_MOVES - 1
+                        # self.round_idx = config.NUM_OF_MOVES - 1
+                        self.round_idx = len(self.stats) - 2
                         self.frame_idx = config.FRAMES - 1
                         self.scat.set_facecolors(self.colors[-1])
-                        for move in range(config.NUM_OF_MOVES):
+                        # for move in range(config.NUM_OF_MOVES):
+                        for move in range(len(self.stats) - 1):
                             self.ax.plot(self.source_pos_tbl[0][move: move + 2],
                                          self.source_pos_tbl[1][move: move + 2], 'r--')
+                        self.ax.texts.pop()
+                        self.ax.text(0, config.LAST_COL_INDEX + 2,
+                                     f"Round: {self.stats[self.round_idx + 1][0]} out of {len(self.stats) - 1},"
+                                     f" Grid: {self.stats[self.round_idx + 1][1]},"
+                                     f" Cars: {self.stats[self.round_idx + 1][2]}")
+
                     else:
                         while self.frame_idx > 0:
                             self.frame_idx -= 1
                             yield self.frame_idx
+                        self.ax.texts.pop()
+
                         if self.round_idx > 0:
                             self.round_idx -= 1
                             self.frame_idx = config.FRAMES - 1
                             self.scat.set_facecolors(self.colors[self.round_idx + 1])
+                            self.ax.text(0, config.LAST_COL_INDEX + 2,
+                                         f"Round: {self.stats[self.round_idx + 1][0]} out of {len(self.stats) - 1},"
+                                         f" Grid: {self.stats[self.round_idx + 1][1]},"
+                                         f" Cars: {self.stats[self.round_idx + 1][2]}")
+                        # the state that just pressed once next, and not presses prev
                         else:
                             self.scat.set_facecolors(self.colors[0])
+                            self.ax.text(0, config.LAST_COL_INDEX + 2,
+                                         f"Round: {self.stats[self.round_idx][0]} out of {len(self.stats) - 1},"
+                                         f" Grid: {self.stats[self.round_idx][1]},"
+                                         f" Cars: {self.stats[self.round_idx][2]}")
                         self.ax.lines.pop()
 
                 assert self.frame_idx in {0, config.FRAMES - 1}
                 local_state_ctr += 1
-                print("round and frame:", self.round_idx, self.frame_idx)
+                # print("(diff from gui) round and frame:", self.round_idx, self.frame_idx)
 
     def show(self):
         anim = animation.FuncAnimation(self.fig, self._update, self.gen, interval=1, repeat=False)

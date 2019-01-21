@@ -1,13 +1,14 @@
 from collections import defaultdict
 from defaultlist import defaultlist
 from random import randint, choice
+from json import dumps
 import numpy as np
 import config
 
 """
     Simulation Helper Library
 """
-dir_tbl = {
+int_to_dir = {
     0: "•",
     1: "↑",
     2: "→",
@@ -34,14 +35,15 @@ def init_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
     return {
         "id": car_id,
         "when": when,
-        "trace": [("s", car_pos)]
+        "trace": [("s", car_pos)]  # s == start
     }
+
 
 # covered in unittest
 def init_grid():
     """
     Initiates the grid, may use once in the 0th round
-    :return: A dictionary representation of a grid object
+    :return: A dictionary representation of a grid object and a set with the source's position
     """
     # The grid only contains blocks that have cars
     grid = defaultdict(lambda: [])
@@ -60,7 +62,7 @@ def init_grid():
         car = init_car(i, pos)
         grid[pos].append(car)
 
-    return grid, source_pos
+    return grid, {source_pos}
 
 
 def print_grid(grid: dict, broadcasters: set, mode: int = 0, trace: bool = False):
@@ -134,7 +136,9 @@ def report_grid(grid: dict, broadcasters: set):
     """
     num_of_cars_has_the_msg, source_car_traces = 0, []
     for pos in broadcasters:
+        print(grid[pos])
         for car in grid[pos]:
+            print(car['when'])
             if car['when'] == 0:
                 # could be optimized
                 source_car_traces.append(car['trace'])
@@ -191,14 +195,50 @@ def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
 
     # convert to the new direction to an position coordinate
     if new_dir == 1:
-        return dir_tbl[new_dir], (curr_pos[0] - 1, curr_pos[1])
+        return int_to_dir[new_dir], (curr_pos[0] - 1, curr_pos[1])
     if new_dir == 2:
-        return dir_tbl[new_dir], (curr_pos[0], curr_pos[1] + 1)
+        return int_to_dir[new_dir], (curr_pos[0], curr_pos[1] + 1)
     if new_dir == 3:
-        return dir_tbl[new_dir], (curr_pos[0] + 1, curr_pos[1])
+        return int_to_dir[new_dir], (curr_pos[0] + 1, curr_pos[1])
     if new_dir == 4:
-        return dir_tbl[new_dir], (curr_pos[0], curr_pos[1] - 1)
-    return dir_tbl[new_dir], curr_pos
+        return int_to_dir[new_dir], (curr_pos[0], curr_pos[1] - 1)
+    return int_to_dir[new_dir], curr_pos
+
+
+def get_repr(grid: dict, broadcasters: set, stats: list):
+    flag = False
+    source_trace = []
+    for pos in broadcasters:
+        for car in grid[pos]:
+            if car['when'] == 0:
+                # could be optimized
+                source_trace = car['trace']
+                flag = True
+                break
+        if flag:
+            break
+    new_grid = {}
+    for pos, cars in grid.items():
+        new_grid[str(pos)] = cars
+    conf = {
+        "NUM_OF_ROWS": config.NUM_OF_ROWS,
+        "NUM_OF_COLS": config.NUM_OF_COLS,
+        "NUM_OF_CARS": config.NUM_OF_CARS,
+        "NUM_OF_MOVES": config.NUM_OF_MOVES,
+        "ALLOW_STANDING": config.ALLOW_STANDING,
+        "FIRST_ROW_INDEX": config.FIRST_ROW_INDEX,
+        "FIRST_COL_INDEX": config.FIRST_COL_INDEX,
+        "FIRST_CAR_INDEX": config.FIRST_CAR_INDEX
+    }
+    report = {
+        "config": conf,
+        "grid": new_grid,
+        "broadcasters": list(broadcasters),
+        "source trace": source_trace,
+        "statistics": stats
+    }
+    # print(stats[-1])
+    return report
 
 
 """
@@ -236,16 +276,17 @@ def get_plotting_pos_tbl(grid):
     plotting_pos_bkt = defaultlist(lambda: defaultdict(lambda: 0))
     for pos, cars in grid.items():
         for car in cars:
-            assert len(car['trace']) == config.NUM_OF_MOVES + 1, "sanity check, we want to use the final grid"
+            # assert len(car['trace']) == config.NUM_OF_MOVES + 1, "sanity check, we want to use the final grid"
             # iterate car['trace']
-            for round_idx in range(config.NUM_OF_MOVES + 1):
+            # for round_idx in range(config.NUM_OF_MOVES + 1):
+            for round_idx in range(len(car['trace'])):
                 grid_pos = car['trace'][round_idx][1]
                 plot_pos = get_plotting_pos(grid_pos, plotting_pos_bkt[round_idx])
                 plotting_pos_tbl[round_idx].append(plot_pos)
 
-    assert len(plotting_pos_bkt) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
-    assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
-    assert len(plotting_pos_tbl[0]) == config.NUM_OF_CARS, "for every round, we have NUM_OF_CARS plotting positions"
+    # assert len(plotting_pos_bkt) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
+    # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
+    # assert len(plotting_pos_tbl[0]) == config.NUM_OF_CARS, "for every round, we have NUM_OF_CARS plotting positions"
     return plotting_pos_tbl
 
 
@@ -284,8 +325,9 @@ def get_ls_tbl(plotting_pos_tbl: list):
     :return:
     """
     ls_tbl = defaultlist(lambda: defaultlist(lambda: []))
-    assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
-    for round_idx in range(config.NUM_OF_MOVES):  # only need NUM_OF_MOVES of transitions
+    # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
+    # for round_idx in range(config.NUM_OF_MOVES):  # only need NUM_OF_MOVES of transitions
+    for round_idx in range(len(plotting_pos_tbl) - 1):  # only need NUM_OF_MOVES of transitions
         assert len(plotting_pos_tbl[round_idx]) == config.NUM_OF_CARS, \
             "for every round, we have NUM_OF_CARS plotting positions"
         for car_idx in range(len(plotting_pos_tbl[round_idx])):
@@ -294,8 +336,8 @@ def get_ls_tbl(plotting_pos_tbl: list):
             ls = get_ls(curr_car_pos, next_car_pos)
             ls_tbl[round_idx].append(ls)
 
-    assert len(ls_tbl) == config.NUM_OF_MOVES, "each elem of the list is for a move's animation"
-    assert len(ls_tbl[0]) == config.NUM_OF_CARS, "need to move that many of cars in each animation"
+    # assert len(ls_tbl) == config.NUM_OF_MOVES, "each elem of the list is for a move's animation"
+    # assert len(ls_tbl[0]) == config.NUM_OF_CARS, "need to move that many of cars in each animation"
 
     """
         the above function call gives a 4D array that each entry of the inner 3D array
@@ -346,7 +388,8 @@ def get_source_pos_tbl(grid: dict):
     for pos, cars in grid.items():
         for car in cars:
             if car['when'] == 0:
-                for round_idx in range(config.NUM_OF_MOVES + 1):
+                # for round_idx in range(config.NUM_OF_MOVES + 1):
+                for round_idx in range(len(car['trace'])):
                     grid_pos = car['trace'][round_idx][1]
                     plot_pos = get_source_pos(grid_pos, source_pos_bkt)
                     source_pos_tbl.append(plot_pos)

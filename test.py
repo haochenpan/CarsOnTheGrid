@@ -2,14 +2,19 @@ from collections import defaultdict
 import unittest
 import config
 import helplib
-import main
 
-assert config.NUM_OF_CARS >= 2, "need at least 2 cars, one is the source and one is not"
-assert config.NUM_OF_ROWS * config.NUM_OF_COLS >= 2, "need at least 2 blocks to store the source and other cars"
+
+def base_config_assertions():
+    assert config.NUM_OF_ROWS >= 1
+    assert config.NUM_OF_COLS >= 1
+    assert config.NUM_OF_MOVES >= 2
+    assert config.NUM_OF_CARS >= 2, "need at least 2 cars, one is the source and one is not"
+    assert config.NUM_OF_ROWS * config.NUM_OF_COLS >= 2, "need at least 2 blocks to store the source and other cars"
 
 
 class SimulationTestCase(unittest.TestCase):
     def setUp(self):
+        base_config_assertions()
         self.grid, self.source_pos = helplib.init_grid()
 
     def test_init_grid(self):

@@ -4,8 +4,12 @@
 
 from collections import defaultdict
 import pickle
+import pprint
 import config
 import helplib
+from test import base_config_assertions
+
+base_config_assertions()
 
 
 def move(grid: dict):
@@ -49,36 +53,60 @@ def propagate(grid: dict, broadcasters: set, curr_round: int):
                 car['when'] = curr_round
 
 
+def get_stat(grid: dict, broadcasters: set, curr_round: int):
+    """
+    Could be optimized
+    :param grid:
+    :param broadcasters:
+    :param curr_round:
+    :return:
+    """
+    grid_num = len(broadcasters)
+    car_num = 0
+    for pos in broadcasters:
+        for car in grid[pos]:
+            if car['when'] >= 0:
+                car_num += 1
+    return curr_round, grid_num, car_num
+
+
 def run():
     """
-    Simulate the problem by proforming move and propagate NUM_OF_MOVES of times.
-    :return: The grid object at its final state.
+    Simulate the problem by performing move and propagate NUM_OF_MOVES of times.
+    :return: The grid object at its final state and
+             a broadcaster set that enables faster lookup on the final state.
     """
     # initialize
     round_counter = 0
     total_blocks = config.NUM_OF_ROWS * config.NUM_OF_COLS
+    stats = []
 
     # the dict "grid" only contains blocks that have cars.
     # key: positions (x, y); value: a list of cars in that block
     # the set "broadcasters" always holds positions (x, y)
     # that has at least one broadcaster (or source)
     grid, broadcasters = helplib.init_grid()
-    while round_counter < config.NUM_OF_MOVES and len(broadcasters) < total_blocks:
+    stats.append(get_stat(grid, broadcasters, round_counter))
+    # while round_counter < config.NUM_OF_MOVES and len(broadcasters) < total_blocks:
+    while round_counter < config.NUM_OF_MOVES and stats[-1][2] < config.NUM_OF_CARS:
         round_counter += 1
         grid, broadcasters = move(grid)
+        # stats.append(get_stat(grid, broadcasters, round_counter))
         propagate(grid, broadcasters, round_counter)
-    return grid, broadcasters
+        stats.append(get_stat(grid, broadcasters, round_counter))
+    # assert len(stats) % 2 == 1
+    return grid, broadcasters, stats
 
 
 if __name__ == '__main__':
+    g, b, s = run()
+    # with open('run.pickle', 'wb') as handle:
+    #     pickle.dump((dict(g), b, s), handle)
+    #     print("saved to pickle")
 
-    g, b = run()
-    with open('run.pickle', 'wb') as handle:
-        pickle.dump((dict(g), b), handle)
-        print("saved to pickle")
-
-    # with open('g.pickle', 'rb') as handle:
-    #     g, b = pickle.load(handle)
-    # run_helplib.print_grid(g, b, 0, True)
+    # with open('run.pickle', 'rb') as handle:
+    #     g, b, s = pickle.load(handle)
+    # pp = pprint.PrettyPrinter()
+    # pp.pprint(helplib.get_repr(g, b, s)['broadcasters'])
 
     pass
