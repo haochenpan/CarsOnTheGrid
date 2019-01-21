@@ -21,8 +21,8 @@ class Simulation:
         self.on_going = Event()
         self.data_queue = Queue()
         self.batch_vol = 100
-        self.simulator_num = 60
-        self.db_writer_num = 20
+        self.simulator_num = 48
+        self.db_writer_num = 12
         self.simulation_ctr = 0  # a approx counter due to race condition
         self.simulation_tme = time()
         self.collection = MongoClient()['CarsOnTheGrid']['r20c20n1000r10']
@@ -43,7 +43,7 @@ class Simulation:
                 print(f"{name} is inserting")
                 self.collection.insert_many(write_list)
                 write_list = []
-            sleep(3)
+            sleep(2)
         print(f"{name} is exiting the main loop")
 
         while not self.data_queue.empty():
@@ -81,7 +81,9 @@ class Simulation:
             while self.on_going.is_set():
                 for t in threads:
                     if t.is_alive():
-                        print("writer is alive!")
+                        print(f"Approx {self.simulation_ctr} items collected, "
+                              f"{self.simulation_ctr // (time() - self.simulation_tme)} "
+                              f"items per second")
                         sleep(10)
                     else:
                         print("something goes wrong")
@@ -90,7 +92,7 @@ class Simulation:
             self.on_going.clear()
         for t in threads:
             t.join()
-        print("coordinator exited")
+        print("The coordinator exited")
         print(f"Approx {self.simulation_ctr} items collected, "
               f"at the speed of {self.simulation_ctr // (time() - self.simulation_tme)} items per second")
 
