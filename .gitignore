@@ -2,5 +2,4 @@
 venv*
 __py*
 *pickle*
-.DS_Store
-PhotoLibrary/.DS_Store
+*.DS_Store*
