@@ -7,11 +7,12 @@
         Grid object -> Colors (for all rounds)
         Grid object -> Source's positions on the second graph
 """
-
+from collections import defaultdict
 from threading import Thread, Event
 from time import sleep, time
 from queue import Empty, Queue
 from pymongo import MongoClient
+import pickle
 import main
 import helplib
 
@@ -20,12 +21,12 @@ class Simulation:
     def __init__(self):
         self.on_going = Event()
         self.data_queue = Queue()
-        self.batch_vol = 100
-        self.simulator_num = 48
-        self.db_writer_num = 12
+        self.batch_vol = 50
+        self.simulator_num = 4
+        self.db_writer_num = 4
         self.simulation_ctr = 0  # a approx counter due to race condition
         self.simulation_tme = time()
-        self.collection = MongoClient()['CarsOnTheGrid']['r20c20n1000r10']
+        self.collection = MongoClient()['CarsOnTheGrid']['r20c20n1000r100']
 
     def db_writer(self, name):
         write_list = []
@@ -40,21 +41,24 @@ class Simulation:
                 except Exception as e:
                     repr(e)
             if len(write_list) > 0:
-                print(f"{name} is inserting")
+                # print(f"{name} is inserting")
                 self.collection.insert_many(write_list)
                 write_list = []
-            sleep(2)
+            sleep(0.5)
         print(f"{name} is exiting the main loop")
 
         while not self.data_queue.empty():
-            try:
-                write_list.append(self.data_queue.get_nowait())
-            except Empty:
-                break
-            except Exception as e:
-                repr(e)
-        if len(write_list) > 0:
-            self.collection.insert_many(write_list)
+            for i in range(self.batch_vol):
+                try:
+                    write_list.append(self.data_queue.get_nowait())
+                except Empty:
+                    break
+                except Exception as e:
+                    repr(e)
+            if len(write_list) > 0:
+                # print(f"{name} is inserting")
+                self.collection.insert_many(write_list)
+                write_list = []
         print(f"{name} exited")
 
     def simulator(self, name):
@@ -96,7 +100,23 @@ class Simulation:
         print(f"Approx {self.simulation_ctr} items collected, "
               f"at the speed of {self.simulation_ctr // (time() - self.simulation_tme)} items per second")
 
+    def aggregate(self):
+        # stats = defaultdict(lambda: 0)
+        # docs = self.collection.find({}, {"statistics": 1})
+        # for doc in docs:
+        #     stats[str(len(doc['statistics']))] += 1
+        #
+        # with open('stats.pickle', 'wb') as handle:
+        #     pickle.dump(dict(stats), handle)
+        #     print("saved to pickle")
+
+        with open('stats.pickle', 'rb') as handle:
+            stats = pickle.load(handle)
+        for key in sorted(stats):
+            print(key, stats[key])
+
 
 if __name__ == '__main__':
     worker = Simulation()
-    worker.coordinator()
+    worker.aggregate()
+    # worker.coordinator()

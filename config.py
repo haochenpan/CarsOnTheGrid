@@ -30,7 +30,7 @@ NUM_OF_ROWS = 20
 NUM_OF_COLS = 20
 
 NUM_OF_CARS = 1000
-NUM_OF_MOVES = 10
+NUM_OF_MOVES = 100
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
