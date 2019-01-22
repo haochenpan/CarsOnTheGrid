@@ -8,9 +8,9 @@
 #### 2) To install dependent libraries: pip install -r /path/to/requirements.txt
 
 #### 3) GUI:
-![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-15-2019/Screen%20Shot%202019-01-16%20at%204.50.20%20PM.png)
-![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-15-2019/Screen%20Shot%202019-01-16%20at%204.50.28%20PM.png)
-![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-15-2019/Screen%20Shot%202019-01-16%20at%204.24.13%20PM.png)
+![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/Screen%20Shot%202019-01-16%20at%204.50.20%20PM.png =300x)
+![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/Screen%20Shot%202019-01-16%20at%204.50.28%20PM.png =300x)
+![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/Screen%20Shot%202019-01-16%20at%204.24.13%20PM.png =300x)
 
 #### 4) Stats of 30000 simulations on 1/21/2019:
 ##### Config - Row: 20, Col: 20, Num of Cars: 1000 Max round: 100, Allow standing: True
