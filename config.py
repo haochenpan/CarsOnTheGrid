@@ -4,9 +4,10 @@
 
 """
     Plans for the future, not in particular order:
-        Display config info and round info on GUI
+        Display config info and round info on GUI (Done)
         A chart shows how fast the message can reach every car in a round (x-round #; y-percentage)
-        Blind run, pick a few fast expanding cluster
+        Blind run, pick a few fast expanding cluster (Done)
+        Analysis of blind run data, why broadcast so fast/slow?
         User defined source position and route, will that accelerate message broadcasting?
         Movement Model for all cars, how that will affect message broadcasting? Any new efficient strategies?
         

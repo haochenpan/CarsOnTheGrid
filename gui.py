@@ -34,14 +34,18 @@ def adjust_axis(ax):
 
 
 class GUI(object):
-    def __init__(self):
+    def __init__(self, run_tuple: tuple = None, run_tuple_name: str = None):
         self.forward = True
         self.round_idx = 0
         self.frame_idx = 0
         self.global_state_ctr = 0
-        self.grid, self.broadcaster, self.stats = main.run()
-        # with open('run.pickle', 'rb') as handle:
-        #     self.grid, self.broadcaster, self.stats = pickle.load(handle)
+        if run_tuple:
+            self.grid, self.broadcaster, self.stats = run_tuple
+        elif run_tuple_name:
+            with open(run_tuple_name, 'rb') as handle:
+                self.grid, self.broadcaster, self.stats = pickle.load(handle)
+        else:
+            self.grid, self.broadcaster, self.stats = main.run()
         pos_tbl = helplib.get_plotting_pos_tbl(self.grid)
         self.frames = helplib.get_ls_tbl(pos_tbl)
         self.colors = helplib.get_color_tbl(self.grid)
@@ -163,8 +167,11 @@ class GUI(object):
                 local_state_ctr += 1
                 # print("(diff from gui) round and frame:", self.round_idx, self.frame_idx)
 
+    def gen2(self):
+        yield self.frame_idx
+
     def show(self):
-        anim = animation.FuncAnimation(self.fig, self._update, self.gen, interval=1, repeat=False)
+        anim = animation.FuncAnimation(self.fig, self._update, self.gen2, interval=1, repeat=False)
         axprev = plt.axes([0.8, 0, 0.1, 0.075])
         axnext = plt.axes([0.9, 0, 0.1, 0.075])
         bprev = Button(axprev, 'Prev')
@@ -173,9 +180,25 @@ class GUI(object):
         bnext.on_clicked(self.on_click_next)
         plt.show()
 
+    def show2(self, name):
+        self.round_idx = len(self.stats) - 2
+        self.frame_idx = config.FRAMES - 1
+        self.scat.set_facecolors(self.colors[-1])
+        # for move in range(config.NUM_OF_MOVES):
+        for move in range(len(self.stats) - 1):
+            self.ax.plot(self.source_pos_tbl[0][move: move + 2],
+                         self.source_pos_tbl[1][move: move + 2], 'r--')
+        self.ax.texts.pop()
+        self.ax.text(0, config.LAST_COL_INDEX + 2,
+                     f"Round: {self.stats[self.round_idx + 1][0]} out of {len(self.stats) - 1},"
+                     f" Grid: {self.stats[self.round_idx + 1][1]},"
+                     f" Cars: {self.stats[self.round_idx + 1][2]}")
+        plt.savefig(f"./fig38/{name}.png")
+        plt.close('all')
+
 
 if __name__ == '__main__':
     gui = GUI()
-    gui.show()
+    gui.show2(100)
     # g, b = main.run()
     # print(helplib.get_source_pos_tbl(g))

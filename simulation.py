@@ -12,9 +12,11 @@ from threading import Thread, Event
 from time import sleep, time
 from queue import Empty, Queue
 from pymongo import MongoClient
+import gc
 import pickle
 import main
 import helplib
+from gui import GUI
 
 
 class Simulation:
@@ -101,6 +103,8 @@ class Simulation:
               f"at the speed of {self.simulation_ctr // (time() - self.simulation_tme)} items per second")
 
     def aggregate(self):
+        pass
+
         # stats = defaultdict(lambda: 0)
         # docs = self.collection.find({}, {"statistics": 1})
         # for doc in docs:
@@ -115,8 +119,51 @@ class Simulation:
         for key in sorted(stats):
             print(key, stats[key])
 
+    def find_ids(self):
+        # ids_list = []
+        # docs = self.collection.find({}, {"statistics": 1}).limit(10000)
+        # for doc in docs:
+        #     if len(doc['statistics']) == 38:
+        #         ids_list.append(doc)
+        #         if len(ids_list) > 100:
+        #             break
+        # with open('stats2.pickle', 'wb') as handle:
+        #     pickle.dump(ids_list, handle)
+
+        with open('stats2.pickle', 'rb') as handle:
+            ids_list = pickle.load(handle)
+        for i, e in enumerate(ids_list):
+            print(i, e)
+
+    def store_sim_as_pickle(self):
+        with open('stats2.pickle', 'rb') as handle:
+            min_list = pickle.load(handle)
+        for i in range(55, len(min_list)):
+            curr_id = min_list[i]['_id']
+            rec = self.collection.find_one({'_id': curr_id})
+
+            # convert to grid object
+            new_grid = defaultdict(lambda: [])
+            for pos, cars in rec['grid'].items():
+                for car in cars:
+                    new_grid[tuple(pos)].append({"id": car['id'],
+                                                 "when": car['when'],
+                                                 "trace": [(e[0], tuple(e[1])) for e in car['trace']]})
+            # convert to broadcasters object
+            new_broadcasters = set([tuple(each) for each in rec['broadcasters']])
+
+            gui = GUI(run_tuple=(dict(new_grid), new_broadcasters, rec['statistics']))
+            gui.show2(f"38-{i}-{curr_id}")
+            del gui
+            gc.collect()
+            print(i, " finished")
+
 
 if __name__ == '__main__':
     worker = Simulation()
-    worker.aggregate()
+    # for i in range(118):
+    worker.store_sim_as_pickle()
+
+    # worker.find_ids()
+    # worker.aggregate()
     # worker.coordinator()

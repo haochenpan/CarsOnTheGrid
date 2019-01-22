@@ -253,6 +253,7 @@ def get_plotting_pos(pos: tuple, bkt: dict) -> tuple:
     :param bkt:
     :return:
     """
+    assert type(pos) is tuple
     num_in_the_block = bkt[pos]
     # row_idx starts from 0
     row_idx = num_in_the_block % config.COUNT_PER_ROW_COL
