@@ -16,7 +16,7 @@ import gc
 import pickle
 import main
 import helplib
-from gui import GUI
+from gui import Gui
 
 
 class Simulation:
@@ -120,25 +120,23 @@ class Simulation:
             print(key, stats[key])
 
     def find_ids(self):
-        # ids_list = []
-        # docs = self.collection.find({}, {"statistics": 1}).limit(10000)
-        # for doc in docs:
-        #     if len(doc['statistics']) == 38:
-        #         ids_list.append(doc)
-        #         if len(ids_list) > 100:
-        #             break
-        # with open('stats2.pickle', 'wb') as handle:
-        #     pickle.dump(ids_list, handle)
+        ids_list = []
+        docs = self.collection.find({}, {"statistics": 1})
+        for doc in docs:
+            if len(doc['statistics']) >= 50:
+                ids_list.append(doc)
+        with open('stats2.pickle', 'wb') as handle:
+            pickle.dump(ids_list, handle)
 
         with open('stats2.pickle', 'rb') as handle:
             ids_list = pickle.load(handle)
         for i, e in enumerate(ids_list):
             print(i, e)
 
-    def store_sim_as_pickle(self):
+    def db_to_pic(self):  # remember to change the dir and name where the fig store
         with open('stats2.pickle', 'rb') as handle:
             min_list = pickle.load(handle)
-        for i in range(55, len(min_list)):
+        for i in range(0, len(min_list)):
             curr_id = min_list[i]['_id']
             rec = self.collection.find_one({'_id': curr_id})
 
@@ -150,20 +148,17 @@ class Simulation:
                                                  "when": car['when'],
                                                  "trace": [(e[0], tuple(e[1])) for e in car['trace']]})
             # convert to broadcasters object
-            new_broadcasters = set([tuple(each) for each in rec['broadcasters']])
+            # new_broadcasters = set([tuple(each) for each in rec['broadcasters']])
 
-            gui = GUI(run_tuple=(dict(new_grid), new_broadcasters, rec['statistics']))
-            gui.show2(f"38-{i}-{curr_id}")
-            del gui
-            gc.collect()
-            print(i, " finished")
+            # Gui(data=(dict(new_grid), rec['statistics']), mode=1, name=f'PhotoLibrary/fig50/50-{i}-{curr_id}')
+            Gui(data=(dict(new_grid), rec['statistics']), mode=0)
+            print(i, " finished", len(min_list), "in total")
+            break
 
 
 if __name__ == '__main__':
     worker = Simulation()
-    # for i in range(118):
-    worker.store_sim_as_pickle()
-
+    worker.db_to_pic()
     # worker.find_ids()
     # worker.aggregate()
     # worker.coordinator()

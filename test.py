@@ -5,11 +5,11 @@ import helplib
 
 
 def base_config_assertions():
-    assert config.NUM_OF_ROWS >= 1
-    assert config.NUM_OF_COLS >= 1
+    assert config.NOR >= 1
+    assert config.NOC >= 1
     assert config.NUM_OF_MOVES >= 2
     assert config.NUM_OF_CARS >= 2, "need at least 2 cars, one is the source and one is not"
-    assert config.NUM_OF_ROWS * config.NUM_OF_COLS >= 2, "need at least 2 blocks to store the source and other cars"
+    assert config.NOR * config.NOC >= 2, "need at least 2 blocks to store the source and other cars"
 
 
 class SimulationTestCase(unittest.TestCase):
@@ -54,25 +54,25 @@ class SimulationTestCase(unittest.TestCase):
                                                  ('→', (config.FIRST_ROW_INDEX, config.FIRST_COL_INDEX + 1))})
         left_lower_corner_set = set()
         for i in range(50):
-            left_lower_corner = helplib.get_new_dir_and_pos((config.LAST_ROW_INDEX, config.FIRST_COL_INDEX))
+            left_lower_corner = helplib.get_new_dir_and_pos((config.LRI, config.FIRST_COL_INDEX))
             left_lower_corner_set.add(left_lower_corner)
-        self.assertEqual(left_lower_corner_set, {('↑', (config.LAST_ROW_INDEX - 1, config.FIRST_COL_INDEX)),
-                                                 ('•', (config.LAST_ROW_INDEX, config.FIRST_COL_INDEX)),
-                                                 ('→', (config.LAST_ROW_INDEX, config.FIRST_COL_INDEX + 1))})
+        self.assertEqual(left_lower_corner_set, {('↑', (config.LRI - 1, config.FIRST_COL_INDEX)),
+                                                 ('•', (config.LRI, config.FIRST_COL_INDEX)),
+                                                 ('→', (config.LRI, config.FIRST_COL_INDEX + 1))})
         right_upper_corner_set = set()
         for i in range(50):
-            right_upper_corner = helplib.get_new_dir_and_pos((config.FIRST_ROW_INDEX, config.LAST_COL_INDEX))
+            right_upper_corner = helplib.get_new_dir_and_pos((config.FIRST_ROW_INDEX, config.LCI))
             right_upper_corner_set.add(right_upper_corner)
-        self.assertEqual(right_upper_corner_set, {('←', (config.FIRST_ROW_INDEX, config.LAST_COL_INDEX - 1)),
-                                                  ('•', (config.FIRST_ROW_INDEX, config.LAST_COL_INDEX)),
-                                                  ('↓', (config.FIRST_ROW_INDEX + 1, config.LAST_COL_INDEX))})
+        self.assertEqual(right_upper_corner_set, {('←', (config.FIRST_ROW_INDEX, config.LCI - 1)),
+                                                  ('•', (config.FIRST_ROW_INDEX, config.LCI)),
+                                                  ('↓', (config.FIRST_ROW_INDEX + 1, config.LCI))})
         right_lower_corner_set = set()
         for i in range(50):
-            right_lower_corner = helplib.get_new_dir_and_pos((config.LAST_ROW_INDEX, config.LAST_COL_INDEX))
+            right_lower_corner = helplib.get_new_dir_and_pos((config.LRI, config.LCI))
             right_lower_corner_set.add(right_lower_corner)
-        self.assertEqual(right_lower_corner_set, {('↑', (config.LAST_ROW_INDEX - 1, config.LAST_COL_INDEX)),
-                                                  ('•', (config.LAST_ROW_INDEX, config.LAST_COL_INDEX)),
-                                                  ('←', (config.LAST_ROW_INDEX, config.LAST_COL_INDEX - 1))})
+        self.assertEqual(right_lower_corner_set, {('↑', (config.LRI - 1, config.LCI)),
+                                                  ('•', (config.LRI, config.LCI)),
+                                                  ('←', (config.LRI, config.LCI - 1))})
 
         config.ALLOW_STANDING = False
         left_upper_corner_set = set()
@@ -83,22 +83,22 @@ class SimulationTestCase(unittest.TestCase):
                                                  ('→', (config.FIRST_ROW_INDEX, config.FIRST_COL_INDEX + 1))})
         left_lower_corner_set = set()
         for i in range(50):
-            left_lower_corner = helplib.get_new_dir_and_pos((config.LAST_ROW_INDEX, config.FIRST_COL_INDEX))
+            left_lower_corner = helplib.get_new_dir_and_pos((config.LRI, config.FIRST_COL_INDEX))
             left_lower_corner_set.add(left_lower_corner)
-        self.assertEqual(left_lower_corner_set, {('↑', (config.LAST_ROW_INDEX - 1, config.FIRST_COL_INDEX)),
-                                                 ('→', (config.LAST_ROW_INDEX, config.FIRST_COL_INDEX + 1))})
+        self.assertEqual(left_lower_corner_set, {('↑', (config.LRI - 1, config.FIRST_COL_INDEX)),
+                                                 ('→', (config.LRI, config.FIRST_COL_INDEX + 1))})
         right_upper_corner_set = set()
         for i in range(50):
-            right_upper_corner = helplib.get_new_dir_and_pos((config.FIRST_ROW_INDEX, config.LAST_COL_INDEX))
+            right_upper_corner = helplib.get_new_dir_and_pos((config.FIRST_ROW_INDEX, config.LCI))
             right_upper_corner_set.add(right_upper_corner)
-        self.assertEqual(right_upper_corner_set, {('←', (config.FIRST_ROW_INDEX, config.LAST_COL_INDEX - 1)),
-                                                  ('↓', (config.FIRST_ROW_INDEX + 1, config.LAST_COL_INDEX))})
+        self.assertEqual(right_upper_corner_set, {('←', (config.FIRST_ROW_INDEX, config.LCI - 1)),
+                                                  ('↓', (config.FIRST_ROW_INDEX + 1, config.LCI))})
         right_lower_corner_set = set()
         for i in range(50):
-            right_lower_corner = helplib.get_new_dir_and_pos((config.LAST_ROW_INDEX, config.LAST_COL_INDEX))
+            right_lower_corner = helplib.get_new_dir_and_pos((config.LRI, config.LCI))
             right_lower_corner_set.add(right_lower_corner)
-        self.assertEqual(right_lower_corner_set, {('↑', (config.LAST_ROW_INDEX - 1, config.LAST_COL_INDEX)),
-                                                  ('←', (config.LAST_ROW_INDEX, config.LAST_COL_INDEX - 1))})
+        self.assertEqual(right_lower_corner_set, {('↑', (config.LRI - 1, config.LCI)),
+                                                  ('←', (config.LRI, config.LCI - 1))})
 
 
 if __name__ == '__main__':
