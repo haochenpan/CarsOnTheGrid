@@ -27,11 +27,11 @@
 """
     Common Configs - Grid and cars
 """
-NUM_OF_ROWS = 20
-NUM_OF_COLS = 20
+NUM_OF_ROWS = 10
+NUM_OF_COLS = 10
 
-NUM_OF_CARS = 1000
-NUM_OF_MOVES = 100
+NUM_OF_CARS = 250
+NUM_OF_MOVES = 80
 
 # car movement:
 # [True|False] = [Can|Cannot] stay in the same block in two consecutive rounds
@@ -56,3 +56,9 @@ FRAMES = 30
 """
 LAST_ROW_INDEX = NUM_OF_ROWS + FIRST_ROW_INDEX - 1
 LAST_COL_INDEX = NUM_OF_COLS + FIRST_COL_INDEX - 1
+NOR = NUM_OF_ROWS
+NOC = NUM_OF_COLS
+FRI = FIRST_ROW_INDEX
+FCI = FIRST_COL_INDEX
+LRI = LAST_ROW_INDEX
+LCI = LAST_COL_INDEX

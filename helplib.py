@@ -291,6 +291,14 @@ def get_plotting_pos_tbl(grid):
     return plotting_pos_tbl
 
 
+def get_init_plotting_pos(plotting_pos_tbl):
+    x, y = [], []
+    for xc, yc in plotting_pos_tbl[0]:
+        x.append(xc)
+        y.append(yc)
+    return x, y
+
+
 def get_ls(pos1, pos2):
     """
     Gets an 2D array of positions for the animation,

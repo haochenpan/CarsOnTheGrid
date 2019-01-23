@@ -78,7 +78,7 @@ def run():
     """
     # initialize
     round_counter = 0
-    total_blocks = config.NUM_OF_ROWS * config.NUM_OF_COLS
+    total_blocks = config.NOR * config.NOC
     stats = []
 
     # the dict "grid" only contains blocks that have cars.
@@ -95,14 +95,14 @@ def run():
         propagate(grid, broadcasters, round_counter)
         stats.append(get_stat(grid, broadcasters, round_counter))
     # assert len(stats) % 2 == 1
-    return grid, broadcasters, stats
+    return dict(grid), stats
 
 
 if __name__ == '__main__':
-    g, b, s = run()
-    # with open('run.pickle', 'wb') as handle:
-    #     pickle.dump((dict(g), b, s), handle)
-    #     print("saved to pickle")
+    g, s = run()
+    with open('run.pickle', 'wb') as handle:
+        pickle.dump((g, s), handle)
+        print("saved to pickle")
 
     # with open('run.pickle', 'rb') as handle:
     #     g, b, s = pickle.load(handle)
