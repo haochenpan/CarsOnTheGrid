@@ -1,8 +1,6 @@
 # Project Cars On The Grid
-#### 1) Branches and explanations:
-##### <pre>   dev-1-11-2019 -- prototyping after 01/11/2019 email discussion</pre>
-##### <pre>   dev-1-15-2019 -- prototyping after 01/11/2019 email discussion, GUI version 2</pre>
-##### <pre>   dev-1-17-2019 (latest) -- confirmed simulation method and GUI after 01/17/2019 office discussion</pre>
+#### 1) Branch(es) and explanation(s):
+##### dev-1-17-2019 (latest) -- confirmed simulation method and GUI after 01/17/2019 office discussion
 
 #### 2) To install dependent libraries: pip install -r /path/to/requirements.txt
 
