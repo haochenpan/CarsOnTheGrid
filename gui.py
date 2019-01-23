@@ -9,8 +9,6 @@ import matplotlib.text
 import numpy as np
 import pickle
 
-t = "config and round info"
-
 
 def adjust_axis(ax):
     # draw axis
@@ -55,17 +53,18 @@ class GUI(object):
             x.append(xc)
             y.append(yc)
 
-        self.fig = plt.figure(figsize=(18, 9))
-        ax = self.fig.add_subplot(121, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
+        self.fig = plt.figure(figsize=(18, 18))
+        ax = self.fig.add_subplot(221, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
                                   ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
         adjust_axis(ax)
         # handler to the first plot
         self.scat = plt.scatter(x, y, c=self.colors[0], alpha=0.8)
 
-        # handler to the second plot
-        self.ax = self.fig.add_subplot(122, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
+        # # handler to the second plot
+        self.ax = self.fig.add_subplot(222, xlim=[config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX + 1],
                                        ylim=[config.LAST_COL_INDEX + 1, config.FIRST_COL_INDEX])
         adjust_axis(self.ax)
+
         self.ax.text(config.LAST_ROW_INDEX + 1.5, 0, "Configurations:")
         self.ax.text(config.LAST_ROW_INDEX + 1.5, 0.5, f"Num of rows {config.NUM_OF_ROWS}")
         self.ax.text(config.LAST_ROW_INDEX + 1.5, 1, f"Num of cols {config.NUM_OF_COLS}")
@@ -73,6 +72,15 @@ class GUI(object):
         self.ax.text(config.LAST_ROW_INDEX + 1.5, 2, f"allow standing {config.ALLOW_STANDING}")
         self.ax.text(0, config.LAST_COL_INDEX + 1.5, "Runtime info:")
         self.ax.text(0, config.LAST_COL_INDEX + 2, f"Round: {0} out of {len(self.stats) - 1}, Grid: {1}, Cars: {1}")
+
+        self.ax31 = self.fig.add_subplot(223, xlim=[0, len(self.stats)], ylim=[0, config.NUM_OF_CARS])
+        self.stats3 = np.column_stack(self.stats)
+        print(self.stats3[1])
+        self.ax31.plot(self.stats3[0], self.stats3[2], 'b')
+        self.ax32 = self.ax31.twinx()
+        self.ax32.set_ylim(0, config.NUM_OF_ROWS * config.NUM_OF_COLS)
+        self.ax32.plot(self.stats3[0], self.stats3[1], 'r')
+        # self.fig.tight_layout()
 
     def on_click_next(self, event):
         self.global_state_ctr += 1
@@ -167,11 +175,8 @@ class GUI(object):
                 local_state_ctr += 1
                 # print("(diff from gui) round and frame:", self.round_idx, self.frame_idx)
 
-    def gen2(self):
-        yield self.frame_idx
-
     def show(self):
-        anim = animation.FuncAnimation(self.fig, self._update, self.gen2, interval=1, repeat=False)
+        anim = animation.FuncAnimation(self.fig, self._update, self.gen, interval=1, repeat=False)
         axprev = plt.axes([0.8, 0, 0.1, 0.075])
         axnext = plt.axes([0.9, 0, 0.1, 0.075])
         bprev = Button(axprev, 'Prev')
@@ -193,12 +198,12 @@ class GUI(object):
                      f"Round: {self.stats[self.round_idx + 1][0]} out of {len(self.stats) - 1},"
                      f" Grid: {self.stats[self.round_idx + 1][1]},"
                      f" Cars: {self.stats[self.round_idx + 1][2]}")
-        plt.savefig(f"./fig38/{name}.png")
+        plt.savefig(f"./{name}.png")
         plt.close('all')
 
 
 if __name__ == '__main__':
     gui = GUI()
-    gui.show2(100)
+    gui.show2("100")
     # g, b = main.run()
     # print(helplib.get_source_pos_tbl(g))

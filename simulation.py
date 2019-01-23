@@ -162,7 +162,9 @@ class Simulation:
 if __name__ == '__main__':
     worker = Simulation()
     # for i in range(118):
-    worker.store_sim_as_pickle()
+    # worker.store_sim_as_pickle()
+
+
 
     # worker.find_ids()
     # worker.aggregate()
