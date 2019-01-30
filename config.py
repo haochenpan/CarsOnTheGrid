@@ -27,8 +27,8 @@
 """
     Common Configs - Grid and cars
 """
-NUM_OF_ROWS = 20
-NUM_OF_COLS = 20
+NUM_OF_ROWS = 10
+NUM_OF_COLS = 10
 
 NUM_OF_CARS = 1000
 NUM_OF_MOVES = 80
@@ -52,7 +52,7 @@ COUNT_PER_ROW_COL = 9  # 9/4 elems per row / col
 FRAMES = 30
 
 """
-    (Do not modify) Frequently Used Variables and Validations
+    (Do not modify) Frequently used variables and shorthand notations
 """
 LAST_ROW_INDEX = NUM_OF_ROWS + FIRST_ROW_INDEX - 1
 LAST_COL_INDEX = NUM_OF_COLS + FIRST_COL_INDEX - 1
