@@ -19,3 +19,16 @@
 ![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/fig38/38-17-5c45cd8d08714902ba773e8c.png)
 ##### Typical simulation that finished within 50 rounds (~99 percentile of 30000 simulations):
 ![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/fig50/50-19-5c45d2e1087149037e37ff65.png)
+
+#### 4) Program Structure (for collaborators)
+
+##### Simulation & Visualization (GUI):
+###### config.py (read all comments please)
+
+##### Simulation
+###### main.py (all lines)
+###### helplib.py (all lines before the comment 'GUI Helper Library')
+###### test.py (all test cases... for now)
+
+##### Visualization (GUI)
+###### all remaining code
