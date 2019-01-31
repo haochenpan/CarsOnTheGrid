@@ -1,8 +1,20 @@
 # Project Cars On The Grid
-#### 1) Branch(es) and explanation(s):
-##### dev-1-17-2019 (latest) -- confirmed simulation method and GUI after 01/17/2019 office discussion
 
-#### 2) To install dependent libraries: pip install -r /path/to/requirements.txt
+#### 1) To install dependent libraries:
+`pip install -r /path/to/requirements.txt` 
+
+#### 2) Program Structure (for collaborators)
+
+##### Simulation & Visualization (GUI):
+###### config.py (including all comments )
+
+##### Simulation:
+###### main.py (all lines)
+###### helplib.py (all lines before the comment 'GUI Helper Library')
+###### test.py (all test cases... for now)
+
+##### Visualization (GUI):
+###### all remaining code
 
 #### 3) Stats of 30000 simulations on 1/21/2019:
 ##### Config - Row: 20, Col: 20, Num of Cars: 1000 Max round: 100, Allow standing: True
@@ -17,15 +29,4 @@
 ##### Typical simulation that finished within 50 rounds (~99 percentile of 30000 simulations):
 ![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/fig50/50-19-5c45d2e1087149037e37ff65.png)
 
-#### 4) Program Structure (for collaborators)
 
-##### Simulation & Visualization (GUI):
-###### config.py (read all comments please)
-
-##### Simulation
-###### main.py (all lines)
-###### helplib.py (all lines before the comment 'GUI Helper Library')
-###### test.py (all test cases... for now)
-
-##### Visualization (GUI)
-###### all remaining code
