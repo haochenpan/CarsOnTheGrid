@@ -23,7 +23,7 @@
 ![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/30000.png)
 
 ##### Typical simulation that finished within 25 rounds (~1 percentile of 30000 simulations):
-![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/fig25/25-18-5c45d8a80871490394d01a7e.png)
+![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/fig26/26-12-5c45cfa10871490301fa3a77.png)
 ##### Typical simulation that finished within 38 rounds (~50 percentile of 30000 simulations):
 ![](https://github.com/haochenpan/CarsOnTheGrid/blob/dev-1-17-2019/PhotoLibrary/fig38/38-17-5c45cd8d08714902ba773e8c.png)
 ##### Typical simulation that finished within 50 rounds (~99 percentile of 30000 simulations):
