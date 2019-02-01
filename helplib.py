@@ -19,6 +19,10 @@ int_to_dir = {
 
 
 def get_rand_pos():
+    """
+    generates a random position on the grid, used in car position initialization
+    :return: a position tuple, e.g. (1, 2)
+    """
     r = randint(config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX)
     c = randint(config.FIRST_COL_INDEX, config.LAST_COL_INDEX)
     return r, c
@@ -26,7 +30,7 @@ def get_rand_pos():
 
 def init_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
     """
-    Initiates a car, may use many times in the 0th round
+    generates a car object, used in car initialization
     :param car_id:
     :param car_pos: The position of a car, in the format (x, y)
     :param when: Indicates the round that the car becomes a broadcaster.
@@ -43,7 +47,7 @@ def init_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
 # covered in unittest
 def init_grid() -> (defaultdict, set):
     """
-    Initiates the grid, may use once in the 0th round
+    generates a grid object, used in grid initialization
     :return: A dictionary representation of a grid object and a set with the source's position
     """
     # The grid only contains blocks that have cars
@@ -54,10 +58,11 @@ def init_grid() -> (defaultdict, set):
     source_car = init_car(config.FIRST_CAR_INDEX, source_pos, when=0)
     grid[source_pos].append(source_car)
 
-    # generate other cars, ids in [FIRST_CAR_INDEX + 1, NUM_OF_CARS + FIRST_CAR_INDEX - 1]
+    # generate other cars, with ids [FIRST_CAR_INDEX + 1, NUM_OF_CARS + FIRST_CAR_INDEX - 1]
     for i in range(config.FIRST_CAR_INDEX + 1, config.NUM_OF_CARS + config.FIRST_CAR_INDEX):
         pos = get_rand_pos()
-        # ensure single source
+
+        # ensure single source, i.e. the block with the source only has one car
         while pos == source_pos:
             pos = get_rand_pos()
         car = init_car(i, pos)
@@ -68,7 +73,7 @@ def init_grid() -> (defaultdict, set):
 
 def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
     """
-    Base on the current position (x, y), generate a new random direction (could be ↑) and a position (x, y+1)
+    generates a new random direction (could be ↑) and a position (x, y+1) based on the current position (x, y)
     :param curr_pos: The current position coordinate (i.e. (x, y)) of the car
     :return: The direction and position coordinate (i.e. (d, (x, y)))
     """
@@ -87,9 +92,8 @@ def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
         directions.difference_update({2})
 
     # choose a random direction
-    assert len(directions) > 0
+    # assert len(directions) > 0
     new_dir = choice(tuple(directions))
-    # print(new_dir)
 
     # convert to the new direction to an position coordinate
     if new_dir == 1:
@@ -183,8 +187,8 @@ def get_plotting_pos_tbl(grid):
                 plot_pos = get_plotting_pos(grid_pos, plotting_pos_bkt[round_idx])
                 plotting_pos_tbl[round_idx].append(plot_pos)
 
-    # assert len(plotting_pos_bkt) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
-    # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
+    # assert len(plotting_pos_bkt) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move_cars) rounds"
+    # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move_cars) rounds"
     # assert len(plotting_pos_tbl[0]) == config.NUM_OF_CARS, "for every round, we have NUM_OF_CARS plotting positions"
     return plotting_pos_tbl
 
@@ -232,7 +236,7 @@ def get_ls_tbl(plotting_pos_tbl: list):
     :return:
     """
     ls_tbl = defaultlist(lambda: defaultlist(lambda: []))
-    # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move) rounds"
+    # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move_cars) rounds"
     # for round_idx in range(config.NUM_OF_MOVES):  # only need NUM_OF_MOVES of transitions
     for round_idx in range(len(plotting_pos_tbl) - 1):  # only need NUM_OF_MOVES of transitions
         assert len(plotting_pos_tbl[round_idx]) == config.NUM_OF_CARS, \
@@ -243,8 +247,8 @@ def get_ls_tbl(plotting_pos_tbl: list):
             ls = get_ls(curr_car_pos, next_car_pos)
             ls_tbl[round_idx].append(ls)
 
-    # assert len(ls_tbl) == config.NUM_OF_MOVES, "each elem of the list is for a move's animation"
-    # assert len(ls_tbl[0]) == config.NUM_OF_CARS, "need to move that many of cars in each animation"
+    # assert len(ls_tbl) == config.NUM_OF_MOVES, "each elem of the list is for a move_cars's animation"
+    # assert len(ls_tbl[0]) == config.NUM_OF_CARS, "need to move_cars that many of cars in each animation"
 
     """
         the above function call gives a 4D array that each entry of the inner 3D array

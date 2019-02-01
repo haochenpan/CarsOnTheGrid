@@ -186,7 +186,7 @@ class Gui(object):
                         self.round_idx = len(self.stat) - 2
                         self.frame_idx = config.FRAMES - 1
                         self.scat.set_facecolors(self.colors[-1])
-                        # for move in range(config.NUM_OF_MOVES):
+                        # for move_cars in range(config.NUM_OF_MOVES):
                         for move in range(len(self.stat) - 1):
                             self.ax2.plot(self.source_pos_tbl[0][move: move + 2],
                                           self.source_pos_tbl[1][move: move + 2], 'r--')
