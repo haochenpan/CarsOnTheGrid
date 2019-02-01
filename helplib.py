@@ -41,7 +41,7 @@ def init_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
 
 
 # covered in unittest
-def init_grid():
+def init_grid() -> (defaultdict, set):
     """
     Initiates the grid, may use once in the 0th round
     :return: A dictionary representation of a grid object and a set with the source's position

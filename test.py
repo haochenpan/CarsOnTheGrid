@@ -4,21 +4,23 @@ import config
 import helplib
 
 
-def base_config_assertions():
+def test_configs():
     assert config.NOR >= 1
     assert config.NOC >= 1
-    assert config.NUM_OF_MOVES >= 2
+    assert config.NUM_OF_MOVES >= 2  # because of GUI, may take out in the future
     assert config.NUM_OF_CARS >= 2, "need at least 2 cars, one is the source and one is not"
     assert config.NOR * config.NOC >= 2, "need at least 2 blocks to store the source and other cars"
 
 
 class SimulationTestCase(unittest.TestCase):
     def setUp(self):
-        base_config_assertions()
+        test_configs()
         self.grid, self.source_pos = helplib.init_grid()
 
     def test_init_grid(self):
-        self.assertEqual(len(self.grid[self.source_pos]), 1, "ensure the single source car")
+        self.assertEqual(len(self.source_pos), 1)
+        pos = self.source_pos.pop()
+        self.assertEqual(len(self.grid[pos]), 1, "ensure the single source car")
         cars_count = 0
         for cars in self.grid.values():
             cars_count += len(cars)
@@ -102,4 +104,5 @@ class SimulationTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    test_configs()
     unittest.main()
