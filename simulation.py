@@ -1,5 +1,5 @@
 """
-    Generate during simulation:
+    Generates after simulation:
         Grid object, Broadcaster object, Stats, Config Snapshot
     Generate during GUI call:
         Grid object -> Plotting positions (for the first round)
@@ -12,7 +12,6 @@ from threading import Thread, Event
 from time import sleep, time
 from queue import Empty, Queue
 from pymongo import MongoClient
-import gc
 import pickle
 import main
 import helplib

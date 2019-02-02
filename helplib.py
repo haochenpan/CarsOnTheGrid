@@ -112,40 +112,40 @@ def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
 """
 
 
-def get_repr(grid: dict, broadcasters: set, stats: list):
-    flag = False
-    source_trace = []
-    for pos in broadcasters:
-        for car in grid[pos]:
-            if car['when'] == 0:
-                # could be optimized
-                source_trace = car['trace']
-                flag = True
-                break
-        if flag:
-            break
-    new_grid = {}
-    for pos, cars in grid.items():
-        new_grid[str(pos)] = cars
-    conf = {
-        "NUM_OF_ROWS": config.NUM_OF_ROWS,
-        "NUM_OF_COLS": config.NUM_OF_COLS,
-        "NUM_OF_CARS": config.NUM_OF_CARS,
-        "NUM_OF_MOVES": config.NUM_OF_MOVES,
-        "ALLOW_STANDING": config.ALLOW_STANDING,
-        "FIRST_ROW_INDEX": config.FIRST_ROW_INDEX,
-        "FIRST_COL_INDEX": config.FIRST_COL_INDEX,
-        "FIRST_CAR_INDEX": config.FIRST_CAR_INDEX
-    }
-    report = {
-        "config": conf,
-        "grid": new_grid,
-        "broadcasters": list(broadcasters),
-        "source trace": source_trace,
-        "statistics": stats
-    }
-    # print(stats[-1])
-    return report
+# def get_repr(grid: dict, broadcasters: set, stats: list):
+#     flag = False
+#     source_trace = []
+#     for pos in broadcasters:
+#         for car in grid[pos]:
+#             if car['when'] == 0:
+#                 # could be optimized
+#                 source_trace = car['trace']
+#                 flag = True
+#                 break
+#         if flag:
+#             break
+#     new_grid = {}
+#     for pos, cars in grid.items():
+#         new_grid[str(pos)] = cars
+#     conf = {
+#         "NUM_OF_ROWS": config.NUM_OF_ROWS,
+#         "NUM_OF_COLS": config.NUM_OF_COLS,
+#         "NUM_OF_CARS": config.NUM_OF_CARS,
+#         "NUM_OF_MOVES": config.NUM_OF_MOVES,
+#         "ALLOW_STANDING": config.ALLOW_STANDING,
+#         "FIRST_ROW_INDEX": config.FIRST_ROW_INDEX,
+#         "FIRST_COL_INDEX": config.FIRST_COL_INDEX,
+#         "FIRST_CAR_INDEX": config.FIRST_CAR_INDEX
+#     }
+#     report = {
+#         "config": conf,
+#         "grid": new_grid,
+#         "broadcasters": list(broadcasters),
+#         "source trace": source_trace,
+#         "statistics": stats
+#     }
+#     # print(stats[-1])
+#     return report
 
 
 def get_plotting_pos(pos: tuple, bkt: dict) -> tuple:
@@ -307,6 +307,17 @@ def get_source_pos_tbl(grid: dict):
                 source_pos_tbl = np.stack(source_pos_tbl, axis=1)
                 return source_pos_tbl
     assert False, "sanity check"
+
+
+def get_source_pos_tbl2(trace: list):
+    source_pos_tbl = []
+    source_pos_bkt = defaultdict(lambda: 0)
+    for round_idx in range(len(trace)):
+        grid_pos = trace[round_idx][1]
+        plot_pos = get_source_pos(grid_pos, source_pos_bkt)
+        source_pos_tbl.append(plot_pos)
+    source_pos_tbl = np.stack(source_pos_tbl, axis=1)
+    return source_pos_tbl
 
 
 if __name__ == '__main__':

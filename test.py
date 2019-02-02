@@ -29,7 +29,7 @@ class SimulationTestCase(unittest.TestCase):
     def test_rand_position_generation(self):
         config.ALLOW_STANDING = True
         directions = defaultdict(lambda: 0)
-        for i in range(100000):
+        for i in range(150000):
             curr_pos = helplib.get_rand_pos()
             next_pos = helplib.get_new_dir_and_pos(curr_pos)
             directions[next_pos[0]] += 1
@@ -38,7 +38,7 @@ class SimulationTestCase(unittest.TestCase):
 
         config.ALLOW_STANDING = False
         directions = defaultdict(lambda: 0)
-        for i in range(100000):
+        for i in range(150000):
             curr_pos = helplib.get_rand_pos()
             next_pos = helplib.get_new_dir_and_pos(curr_pos)
             directions[next_pos[0]] += 1

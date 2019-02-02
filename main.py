@@ -67,7 +67,7 @@ def propagate(grid: dict, broadcasters: set, curr_round: int):
 
 def get_stats(grid: dict, broadcasters: set, curr_round: int):
     """
-    Call after propagate
+    Call after every propagate
     :param grid:
     :param broadcasters:
     :param curr_round:
@@ -105,7 +105,7 @@ def run():
         propagate(grid, broadcasters, round_counter)  # broadcast the message
         stats.append(get_stats(grid, broadcasters, round_counter))  # log statistics
 
-    # find the source's trace
+    # after simulation, locates the source's trace
     # could be optimized
     flag = False
     trace = []
@@ -117,7 +117,22 @@ def run():
                 break
         if flag:
             break
-    return dict(grid), {"stats": stats, "trace": trace}
+
+    # after simulation, gathers configs
+    confi = {
+        "NUM_OF_ROWS": config.NUM_OF_ROWS,
+        "NUM_OF_COLS": config.NUM_OF_COLS,
+        "NUM_OF_CARS": config.NUM_OF_CARS,
+        "NUM_OF_MOVES": config.NUM_OF_MOVES,
+        "ALLOW_STANDING": config.ALLOW_STANDING,
+        "FIRST_ROW_INDEX": config.FIRST_ROW_INDEX,
+        "FIRST_COL_INDEX": config.FIRST_COL_INDEX,
+        "LAST_ROW_INDEX": config.LAST_ROW_INDEX,
+        "LAST_COL_INDEX": config.LAST_COL_INDEX,
+        "FIRST_CAR_INDEX": config.FIRST_CAR_INDEX,
+    }
+
+    return dict(grid), {"stats": stats, "trace": trace, "confi": confi}
 
 
 if __name__ == '__main__':

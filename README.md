@@ -1,12 +1,12 @@
 # Project Cars On The Grid
-
+## More precisely, project "cars in blocks"
 #### 1) To install dependent libraries:
 `pip install -r /path/to/requirements.txt` 
 
 #### 2) Program Structure (for collaborators)
 
-##### Simulation & Visualization (GUI):
-###### config.py (including all comments )
+##### Read this first:
+###### config.py
 
 ##### Simulation:
 ###### main.py (all lines)
