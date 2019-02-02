@@ -1,5 +1,5 @@
 # Project Cars On The Grid
-## More precisely, project "cars in blocks"
+## More precisely, the project name is "Cars In Blocks"
 #### 1) To install dependent libraries:
 `pip install -r /path/to/requirements.txt` 
 
