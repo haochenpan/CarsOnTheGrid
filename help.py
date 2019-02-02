@@ -2,7 +2,7 @@ from collections import defaultdict
 from defaultlist import defaultlist
 from random import randint, choice
 import numpy as np
-import config
+import conf
 
 """
     Simulation Helper Library
@@ -23,8 +23,8 @@ def get_rand_pos():
     generates a random position on the grid, used in car position initialization
     :return: a position tuple, e.g. (1, 2)
     """
-    r = randint(config.FIRST_ROW_INDEX, config.LAST_ROW_INDEX)
-    c = randint(config.FIRST_COL_INDEX, config.LAST_COL_INDEX)
+    r = randint(conf.FIRST_ROW_INDEX, conf.LAST_ROW_INDEX)
+    c = randint(conf.FIRST_COL_INDEX, conf.LAST_COL_INDEX)
     return r, c
 
 
@@ -55,11 +55,11 @@ def init_grid() -> (defaultdict, set):
 
     # generate the source car, id = FIRST_CAR_INDEX
     source_pos = get_rand_pos()
-    source_car = init_car(config.FIRST_CAR_INDEX, source_pos, when=0)
+    source_car = init_car(conf.FIRST_CAR_INDEX, source_pos, when=0)
     grid[source_pos].append(source_car)
 
     # generate other cars, with ids [FIRST_CAR_INDEX + 1, NUM_OF_CARS + FIRST_CAR_INDEX - 1]
-    for i in range(config.FIRST_CAR_INDEX + 1, config.NUM_OF_CARS + config.FIRST_CAR_INDEX):
+    for i in range(conf.FIRST_CAR_INDEX + 1, conf.NUM_OF_CARS + conf.FIRST_CAR_INDEX):
         pos = get_rand_pos()
 
         # ensure single source, i.e. the block with the source only has one car
@@ -78,17 +78,17 @@ def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
     :return: The direction and position coordinate (i.e. (d, (x, y)))
     """
     directions = {1, 2, 3, 4}
-    if config.ALLOW_STANDING:
+    if conf.ALLOW_STANDING:
         directions.add(0)
 
     # removes directions that a border block does not have
-    if curr_pos[0] == config.FIRST_ROW_INDEX:
+    if curr_pos[0] == conf.FIRST_ROW_INDEX:
         directions.difference_update({1})
-    if curr_pos[0] == config.LAST_ROW_INDEX:
+    if curr_pos[0] == conf.LAST_ROW_INDEX:
         directions.difference_update({3})
-    if curr_pos[1] == config.FIRST_COL_INDEX:
+    if curr_pos[1] == conf.FIRST_COL_INDEX:
         directions.difference_update({4})
-    if curr_pos[1] == config.LAST_COL_INDEX:
+    if curr_pos[1] == conf.LAST_COL_INDEX:
         directions.difference_update({2})
 
     # choose a random direction
@@ -158,12 +158,12 @@ def get_plotting_pos(pos: tuple, bkt: dict) -> tuple:
     assert type(pos) is tuple
     num_in_the_block = bkt[pos]
     # row_idx starts from 0
-    row_idx = num_in_the_block % config.COUNT_PER_ROW_COL
-    col_idx = num_in_the_block // config.COUNT_PER_ROW_COL
+    row_idx = num_in_the_block % conf.COUNT_PER_ROW_COL
+    col_idx = num_in_the_block // conf.COUNT_PER_ROW_COL
     # print(pos)
     # print(row_idx, col_idx)
-    row_pos = pos[0] + config.PADDING + config.PADDING * row_idx
-    col_pos = pos[1] + config.PADDING + config.PADDING * col_idx
+    row_pos = pos[0] + conf.PADDING + conf.PADDING * row_idx
+    col_pos = pos[1] + conf.PADDING + conf.PADDING * col_idx
     bkt[pos] += 1
     # print(row_pos, col_pos)
     return row_pos, col_pos
@@ -213,9 +213,9 @@ def get_ls(pos1, pos2):
     :param pos2:
     :return:
     """
-    ls_x = np.linspace(pos1[0], pos2[0], num=config.FRAMES,
+    ls_x = np.linspace(pos1[0], pos2[0], num=conf.FRAMES,
                        dtype=np.float16)  # no need such precision, and optimize mem usage
-    ls_y = np.linspace(pos1[1], pos2[1], num=config.FRAMES, dtype=np.float16)
+    ls_y = np.linspace(pos1[1], pos2[1], num=conf.FRAMES, dtype=np.float16)
     ls = np.column_stack((ls_x, ls_y))
     return ls
 
@@ -239,7 +239,7 @@ def get_ls_tbl(plotting_pos_tbl: list):
     # assert len(plotting_pos_tbl) == config.NUM_OF_MOVES + 1, "make sure we have len(init and every move_cars) rounds"
     # for round_idx in range(config.NUM_OF_MOVES):  # only need NUM_OF_MOVES of transitions
     for round_idx in range(len(plotting_pos_tbl) - 1):  # only need NUM_OF_MOVES of transitions
-        assert len(plotting_pos_tbl[round_idx]) == config.NUM_OF_CARS, \
+        assert len(plotting_pos_tbl[round_idx]) == conf.NUM_OF_CARS, \
             "for every round, we have NUM_OF_CARS plotting positions"
         for car_idx in range(len(plotting_pos_tbl[round_idx])):
             curr_car_pos = plotting_pos_tbl[round_idx][car_idx]
@@ -265,12 +265,12 @@ def get_ls_tbl(plotting_pos_tbl: list):
 def get_colors(car: dict):
     when = car['when']
     if when == -1:
-        return ['b' for i in range(config.NUM_OF_MOVES + 1)]
+        return ['b' for i in range(conf.NUM_OF_MOVES + 1)]
     elif when == 0:
-        return ['r' for i in range(config.NUM_OF_MOVES + 1)]
+        return ['r' for i in range(conf.NUM_OF_MOVES + 1)]
     else:
         colors = ['b' for i in range(when)]
-        colors.extend(['y' for i in range(config.NUM_OF_MOVES + 1 - when)])
+        colors.extend(['y' for i in range(conf.NUM_OF_MOVES + 1 - when)])
         return colors
 
 
@@ -280,36 +280,20 @@ def get_color_tbl(grid: dict):
         for c in cs:
             color_tbl.append(get_colors(c))
     color_tbl = np.stack(color_tbl, axis=1)
-    assert len(color_tbl) == config.NUM_OF_MOVES + 1, ""
-    assert len(color_tbl[0]) == config.NUM_OF_CARS, ""
+    assert len(color_tbl) == conf.NUM_OF_MOVES + 1, ""
+    assert len(color_tbl[0]) == conf.NUM_OF_CARS, ""
     return color_tbl
 
 
 def get_source_pos(pos: tuple, bkt: dict) -> tuple:
     num_in_the_block = bkt[pos]
-    row_pos = pos[0] + config.PADDING + config.PADDING * num_in_the_block
-    col_pos = pos[1] + config.PADDING + config.PADDING * num_in_the_block
+    row_pos = pos[0] + conf.PADDING + conf.PADDING * num_in_the_block
+    col_pos = pos[1] + conf.PADDING + conf.PADDING * num_in_the_block
     bkt[pos] += 1
     return row_pos, col_pos
 
 
-def get_source_pos_tbl(grid: dict):
-    source_pos_tbl = []
-    source_pos_bkt = defaultdict(lambda: 0)
-    for pos, cars in grid.items():
-        for car in cars:
-            if car['when'] == 0:
-                # for round_idx in range(config.NUM_OF_MOVES + 1):
-                for round_idx in range(len(car['trace'])):
-                    grid_pos = car['trace'][round_idx][1]
-                    plot_pos = get_source_pos(grid_pos, source_pos_bkt)
-                    source_pos_tbl.append(plot_pos)
-                source_pos_tbl = np.stack(source_pos_tbl, axis=1)
-                return source_pos_tbl
-    assert False, "sanity check"
-
-
-def get_source_pos_tbl2(trace: list):
+def get_source_pos_tbl(trace: list):
     source_pos_tbl = []
     source_pos_bkt = defaultdict(lambda: 0)
     for round_idx in range(len(trace)):

@@ -14,7 +14,7 @@ from queue import Empty, Queue
 from pymongo import MongoClient
 import pickle
 import main
-import helplib
+import help
 from gui import Gui
 
 
@@ -65,7 +65,7 @@ class Simulation:
     def simulator(self, name):
         while self.on_going.is_set():
             g, b, s = main.run()
-            self.data_queue.put(helplib.get_repr(g, b, s))
+            self.data_queue.put(help.get_repr(g, b, s))
             self.simulation_ctr += 1
         print(f"{name} exited")
 

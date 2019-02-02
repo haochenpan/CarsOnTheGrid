@@ -7,8 +7,8 @@ from matplotlib.widgets import Button
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import main
-import config
-import helplib
+import conf
+import help
 from types import MethodType
 import matplotlib.text
 import numpy as np
@@ -64,7 +64,7 @@ class Gui(object):
                                         ylim=[self.confi["LAST_COL_INDEX"] + 1, self.confi["FIRST_COL_INDEX"]])
         self._adjust_axis(self.ax2)
         self._set_up_text(-1)
-        self.source_pos_tbl = helplib.get_source_pos_tbl2(self.trace)
+        self.source_pos_tbl = help.get_source_pos_tbl(self.trace)
         for move in range(len(self.stats) - 1):
             self.ax2.plot(self.source_pos_tbl[0][move: move + 2],
                           self.source_pos_tbl[1][move: move + 2], 'r--')
@@ -89,10 +89,10 @@ class Gui(object):
             return
 
         # generate plotting and animation data
-        pos_tbl = helplib.get_plotting_pos_tbl(grid)
-        x, y = helplib.get_init_plotting_pos(pos_tbl)
-        self.frames = helplib.get_ls_tbl(pos_tbl)
-        self.colors = helplib.get_color_tbl(grid)
+        pos_tbl = help.get_plotting_pos_tbl(grid)
+        x, y = help.get_init_plotting_pos(pos_tbl)
+        self.frames = help.get_ls_tbl(pos_tbl)
+        self.colors = help.get_color_tbl(grid)
 
         # user control - scatter plot
         self.ax1 = self.fig.add_subplot(121,
@@ -183,7 +183,7 @@ class Gui(object):
                             self.frame_idx = 0
 
                         # for all states except the the final state
-                        while self.frame_idx < config.FRAMES - 1:
+                        while self.frame_idx < conf.FRAMES - 1:
                             self.frame_idx += 1
                             yield self.frame_idx
                         self.scat.set_facecolors(self.colors[self.round_idx + 1])
@@ -199,7 +199,7 @@ class Gui(object):
                     # if the very initial state, but pressed backward
                     if self.frame_idx == 0:
                         self.round_idx = len(self.stats) - 2
-                        self.frame_idx = config.FRAMES - 1
+                        self.frame_idx = conf.FRAMES - 1
                         self.scat.set_facecolors(self.colors[-1])
                         for move in range(len(self.stats) - 1):
                             self.ax2.plot(self.source_pos_tbl[0][move: move + 2],
@@ -218,7 +218,7 @@ class Gui(object):
 
                         if self.round_idx > 0:
                             self.round_idx -= 1
-                            self.frame_idx = config.FRAMES - 1
+                            self.frame_idx = conf.FRAMES - 1
                             self.scat.set_facecolors(self.colors[self.round_idx + 1])
                             self.ax2.text(0, self.confi["LAST_COL_INDEX"] + 2,
                                           f"Round: {self.stats[self.round_idx + 1][0]} out of {len(self.stats) - 1},"
@@ -233,7 +233,7 @@ class Gui(object):
                                           f" Cars: {self.stats[self.round_idx][2]}")
                         self.ax2.lines.pop()
 
-                assert self.frame_idx in {0, config.FRAMES - 1}
+                assert self.frame_idx in {0, conf.FRAMES - 1}
                 local_state_ctr += 1
 
     # noinspection PyTypeChecker
@@ -249,4 +249,4 @@ class Gui(object):
 
 
 if __name__ == '__main__':
-    gui = Gui(mode=0)
+    gui = Gui(mode=1, data='run.pickle')

@@ -9,8 +9,19 @@
                         NUM_OF_MOVES moves and propagates are performed in a simulation,
                         and NUM_OF_MOVES-th round is the last round.
 
+    Program Structure:
+        conf.py:      Program descriptions, configurations and validations
+        gui.py:         User control Gui / Snapshot Generation
+        help.py:        The home of helper functions
+        main.py:        Generates a simulation
+        simulation.py:  Continuous simulation with threading, database connectivity
+        stats_gui.py:   Generates a scatter plot from the results of simulations
+        test.py:        Unit tests (not complete)
+
     Developer plans, not in particular order:
-        (Haochen) Analyze blind run data, quantify measurements. Why broadcast fast/slow?
+        TODO(Haochen): Analyze blind run data, quantify measurements. Why broadcast fast/slow?
+        Reorganize the code, move this part and other memos to readme file
+        Add more unit tests
         User defined source position and route, will that accelerate message broadcasting?
         Movement Model for all cars, how that will affect message broadcasting? Any new efficient strategies?
 

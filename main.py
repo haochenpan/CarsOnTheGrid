@@ -1,12 +1,12 @@
 """
     The main simulation program of the CarsOnTheGrid problem
-    Friendly reminder, read comments in config.py if you want to know some terminologies of this project
+    Friendly reminder, read comments in conf.py if you want to know some terminologies of this project
 """
 
 from collections import defaultdict
 import pickle
-import config
-import helplib
+import conf
+import help
 from test import test_configs
 
 
@@ -31,7 +31,7 @@ def move_cars(grid: dict):
             curr_dir_and_pos = car["trace"][-1]  # fetch the last element of the trace
 
             # next_dir_and_pos could == ('↓', (1, 0))
-            next_dir_and_pos = helplib.get_new_dir_and_pos(curr_dir_and_pos[1])
+            next_dir_and_pos = help.get_new_dir_and_pos(curr_dir_and_pos[1])
 
             # update the car trace
             car["trace"].append(next_dir_and_pos)
@@ -95,11 +95,11 @@ def run():
     # key: positions (x, y); value: a list of cars in that block
     # the set "broadcasters" always holds positions (x, y)
     # that has at least one broadcaster (or source)
-    grid, broadcasters = helplib.init_grid()
+    grid, broadcasters = help.init_grid()
     stats.append(get_stats(grid, broadcasters, round_counter))
 
     # while we have not reached the number of moves AND not all cars received the message
-    while round_counter < config.NUM_OF_MOVES and stats[-1][2] < config.NUM_OF_CARS:
+    while round_counter < conf.NUM_OF_MOVES and stats[-1][2] < conf.NUM_OF_CARS:
         round_counter += 1
         grid, broadcasters = move_cars(grid)  # move_cars cars
         propagate(grid, broadcasters, round_counter)  # broadcast the message
@@ -120,16 +120,16 @@ def run():
 
     # after simulation, gathers configs
     confi = {
-        "NUM_OF_ROWS": config.NUM_OF_ROWS,
-        "NUM_OF_COLS": config.NUM_OF_COLS,
-        "NUM_OF_CARS": config.NUM_OF_CARS,
-        "NUM_OF_MOVES": config.NUM_OF_MOVES,
-        "ALLOW_STANDING": config.ALLOW_STANDING,
-        "FIRST_ROW_INDEX": config.FIRST_ROW_INDEX,
-        "FIRST_COL_INDEX": config.FIRST_COL_INDEX,
-        "LAST_ROW_INDEX": config.LAST_ROW_INDEX,
-        "LAST_COL_INDEX": config.LAST_COL_INDEX,
-        "FIRST_CAR_INDEX": config.FIRST_CAR_INDEX,
+        "NUM_OF_ROWS": conf.NUM_OF_ROWS,
+        "NUM_OF_COLS": conf.NUM_OF_COLS,
+        "NUM_OF_CARS": conf.NUM_OF_CARS,
+        "NUM_OF_MOVES": conf.NUM_OF_MOVES,
+        "ALLOW_STANDING": conf.ALLOW_STANDING,
+        "FIRST_ROW_INDEX": conf.FIRST_ROW_INDEX,
+        "FIRST_COL_INDEX": conf.FIRST_COL_INDEX,
+        "LAST_ROW_INDEX": conf.LAST_ROW_INDEX,
+        "LAST_COL_INDEX": conf.LAST_COL_INDEX,
+        "FIRST_CAR_INDEX": conf.FIRST_CAR_INDEX,
     }
 
     return dict(grid), {"stats": stats, "trace": trace, "confi": confi}
