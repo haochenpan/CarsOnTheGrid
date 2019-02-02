@@ -3,4 +3,6 @@ venv*
 __py*
 *pickle*
 *.DS_Store*
-*snapshot*
+Photo*
+
+
