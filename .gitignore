@@ -4,5 +4,6 @@ __py*
 *pickle*
 *.DS_Store*
 Photo*
+snapshot.*
 
 

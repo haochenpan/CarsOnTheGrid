@@ -128,9 +128,9 @@ class Gui(object):
                                    matplotlib.text.Text.set_y(s, y - s.customShiftValue), lbl)
 
         # append axis labels
-        ax.set_xlabel("Row Num")
+        ax.set_xlabel("Col Num")
         ax.xaxis.set_label_position('top')
-        ax.set_ylabel("Col Num")
+        ax.set_ylabel("Row Num")
 
     def _set_up_text(self, round_index):
         self.ax2.text(self.confi["LAST_ROW_INDEX"] + 1.5, 0.0, f"Configurations:")
@@ -249,4 +249,4 @@ class Gui(object):
 
 
 if __name__ == '__main__':
-    gui = Gui(mode=1, data='run.pickle')
+    gui = Gui(mode=0)
