@@ -54,7 +54,10 @@ def init_grid() -> (defaultdict, set):
     grid = defaultdict(lambda: [])
 
     # generate the source car, id = FIRST_CAR_INDEX
-    source_pos = get_rand_pos()
+    if conf.RESTRICTING_MIDDLE:
+        source_pos = conf.MID_POS
+    else:
+        source_pos = get_rand_pos()
     source_car = init_car(conf.FIRST_CAR_INDEX, source_pos, when=0)
     grid[source_pos].append(source_car)
 
@@ -69,6 +72,37 @@ def init_grid() -> (defaultdict, set):
         grid[pos].append(car)
 
     return grid, {source_pos}
+
+
+# Only needed if we need to control the movement of the source car
+# Now only consider restricting in the middle cases so no need to check if hit the border
+def get_source_new_dir_and_pos(curr_pos: tuple) -> tuple:
+    directions = {1, 2, 3, 4}
+    if conf.ALLOW_STANDING:
+        directions.add(0)
+
+    if curr_pos[0] == conf.RESTRICTING_MIDDLE_TOP_BORDER:
+        directions.difference_update({1})
+    if curr_pos[0] == conf.RESTRICTING_MIDDLE_BOTTOM_BORDER:
+        directions.difference_update({3})
+    if curr_pos[1] == conf.RESTRICTING_MIDDLE_LEFT_BORDER:
+        directions.difference_update({4})
+    if curr_pos[1] == conf.RESTRICTING_MIDDLE_RIGHT_BORDER:
+        directions.difference_update({2})
+
+    new_dir = choice(tuple(directions))
+
+    # convert to the new direction to an position coordinate
+    if new_dir == 1:
+        return int_to_dir[new_dir], (curr_pos[0] - 1, curr_pos[1])
+    if new_dir == 2:
+        return int_to_dir[new_dir], (curr_pos[0], curr_pos[1] + 1)
+    if new_dir == 3:
+        return int_to_dir[new_dir], (curr_pos[0] + 1, curr_pos[1])
+    if new_dir == 4:
+        return int_to_dir[new_dir], (curr_pos[0], curr_pos[1] - 1)
+
+    return int_to_dir[new_dir], curr_pos
 
 
 def get_new_dir_and_pos(curr_pos: tuple) -> tuple:
