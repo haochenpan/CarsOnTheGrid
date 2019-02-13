@@ -68,3 +68,49 @@ FRI = FIRST_ROW_INDEX
 FCI = FIRST_COL_INDEX
 LRI = LAST_ROW_INDEX
 LCI = LAST_COL_INDEX
+
+"""
+    Variable that keeps track the current position of the source card
+    Not used Yet.
+"""
+SOURCE_CURRENT_ROW = 0
+SOURCE_CURRENT_COL = 0
+
+"""
+    Keeping track the middle point
+"""
+# Middle Row
+MR = NUM_OF_ROWS / 2
+# Middle Column
+MC = NUM_OF_COLS / 2
+
+"""
+    Variable needed for restricting the source car in the middle
+"""
+# True: The source car should only be restricted in the middle area;
+# False: Other Cases
+RESTRICTING_MIDDLE = False
+
+# Middle_Pos:
+MID_POS = (MR, MC)
+
+# Length of the Restricting rows
+RESTRICTING_MIDDLE_ROW_LEN = 3
+# Length of the Restricting cols
+RESTRICTING_MIDDLE_COL_LEN = 3
+
+# Restricting the border of the sour car
+RESTRICTING_MIDDLE_TOP_BORDER = int(MR - ((RESTRICTING_MIDDLE_ROW_LEN + 1) / 2))
+RESTRICTING_MIDDLE_BOTTOM_BORDER = int(MR + (RESTRICTING_MIDDLE_ROW_LEN / 2))
+RESTRICTING_MIDDLE_LEFT_BORDER = int(MC - ((RESTRICTING_MIDDLE_COL_LEN + 1) / 2))
+RESTRICTING_MIDDLE_RIGHT_BORDER = int(MC + (RESTRICTING_MIDDLE_COL_LEN / 2))
+
+"""
+    Variable needed for going towards the middle
+"""
+GO_TO_MID = True
+
+dia_North = False
+dia_South = False
+dia_East = False
+dia_West = False

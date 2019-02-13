@@ -30,8 +30,29 @@ def move_cars(grid: dict):
             # curr_dir_and_pos could == ('s', (0, 0))
             curr_dir_and_pos = car["trace"][-1]  # fetch the last element of the trace
 
+            if len(car["trace"]) == 1:
+                prev_dir_and_pos = ('no', ())
+            else:
+                prev_dir_and_pos = car["trace"][-2] # fetch the second last element of the trace
+
             # next_dir_and_pos could == ('↓', (1, 0))
-            next_dir_and_pos = help.get_new_dir_and_pos(curr_dir_and_pos[1])
+            # Restricting Middle
+            if conf.RESTRICTING_MIDDLE:
+                if car["id"] == conf.FIRST_CAR_INDEX:
+                    print(curr_dir_and_pos)
+                    next_dir_and_pos = help.get_source_new_dir_and_pos(curr_dir_and_pos[1])
+                else:
+                    next_dir_and_pos = help.get_new_dir_and_pos(curr_dir_and_pos[1])
+            # Going towards the middle point
+            elif conf.GO_TO_MID:
+                if car["id"] == conf.FIRST_CAR_INDEX:
+                    print(curr_dir_and_pos, prev_dir_and_pos)
+                    next_dir_and_pos = help.get_source_dia_toggle_new_dir_and_pos(curr_dir_and_pos[1], prev_dir_and_pos[1])
+                else:
+                    next_dir_and_pos = help.get_new_dir_and_pos(curr_dir_and_pos[1])
+            # Random Case:
+            else:
+                next_dir_and_pos = help.get_new_dir_and_pos(curr_dir_and_pos[1])
 
             # update the car trace
             car["trace"].append(next_dir_and_pos)
@@ -131,7 +152,7 @@ def run():
         "LAST_COL_INDEX": conf.LAST_COL_INDEX,
         "FIRST_CAR_INDEX": conf.FIRST_CAR_INDEX,
     }
-
+    print('Round:' + str(round_counter))
     return dict(grid), {"stats": stats, "trace": trace, "confi": confi}
 
 
