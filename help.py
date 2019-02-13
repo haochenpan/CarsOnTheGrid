@@ -43,6 +43,21 @@ def init_car(car_id: int, car_pos: tuple, when: int = -1) -> dict:
         "trace": [("s", car_pos)]  # s == start
     }
 
+# Initialize the direction for the source car
+def setDirection(source_start :tuple):
+    x_axis = source_start[1]
+    y_axis = source_start[0]
+
+    if x_axis < conf.MC:
+        conf.dia_East = True
+    elif x_axis > conf.MC:
+        conf.dia_West = True
+
+    if y_axis < conf.MR:
+        conf.dia_South = True
+    elif y_axis > conf.MR:
+        conf.dia_North = True
+
 
 # covered in unittest
 def init_grid() -> (defaultdict, set):
@@ -58,7 +73,13 @@ def init_grid() -> (defaultdict, set):
         source_pos = conf.MID_POS
     else:
         source_pos = get_rand_pos()
+
     source_car = init_car(conf.FIRST_CAR_INDEX, source_pos, when=0)
+
+    # Need to setUp the Initial Direction if the car wants to go to the middle
+    if conf.GO_TO_MID:
+        setDirection(source_pos)
+
     grid[source_pos].append(source_car)
 
     # generate other cars, with ids [FIRST_CAR_INDEX + 1, NUM_OF_CARS + FIRST_CAR_INDEX - 1]
@@ -72,6 +93,108 @@ def init_grid() -> (defaultdict, set):
         grid[pos].append(car)
 
     return grid, {source_pos}
+
+
+# Return False if previous move is a horizontal change
+# Return true if previous move is a vertical change
+def horizontal_or_vectical_change(cur_pos, prev_pos :tuple):
+    if cur_pos[0] - prev_pos[0] != 0:
+        return True
+    return False
+
+
+def src_dia_north(curr_pos :tuple) -> tuple:
+    if curr_pos[0] - 1 == conf.MR:
+        conf.dia_North = False
+    return int_to_dir[1], (curr_pos[0] - 1, curr_pos[1])
+
+
+def src_dia_south(curr_pos :tuple) -> tuple:
+    if curr_pos[0] + 1 == conf.MR:
+        conf.dia_South = False
+    return int_to_dir[3], (curr_pos[0] + 1, curr_pos[1])
+
+
+def src_dia_east(curr_pos: tuple) -> tuple:
+    if curr_pos[1] + 1 == conf.MC:
+        conf.dia_East = False
+    return int_to_dir[2], (curr_pos[0], curr_pos[1] + 1)
+
+
+def src_dia_west(curr_pos: tuple) -> tuple:
+    if curr_pos[1] + 1 == conf.MC:
+        conf.dia_West = False
+    return int_to_dir[4], (curr_pos[0], curr_pos[1] - 1)
+
+
+def get_source_dia_toggle_new_dir_and_pos(curr_pos, prev_pos: tuple) -> tuple:
+    # if already in the middle, stay
+    if curr_pos[0] == conf.MR and curr_pos[1] == conf.MC:
+        return int_to_dir[0], (curr_pos[0], curr_pos[1])
+
+    # if now are on the same column as mid point
+    if curr_pos[1] == conf.MC:
+        # if needs to go to top
+        if conf.dia_North:
+            return src_dia_north(curr_pos)
+        # if needs to go to bottom
+        if conf.dia_South:
+            return src_dia_south(curr_pos)
+
+    # if now are on the same row as mid point
+    elif curr_pos[0] == conf.MR:
+        # if needs to go to right
+        if conf.dia_East:
+            return src_dia_east(curr_pos)
+        # if needs to go to left
+        if conf.dia_West:
+            return src_dia_west(curr_pos)
+
+    # General Cases
+    else:
+        # First move is always horizontal
+        if len(prev_pos) == 0:
+            if conf.dia_East:
+                return src_dia_east(curr_pos)
+            elif conf.dia_West:
+                return src_dia_west(curr_pos)
+        else:
+            prev_move = horizontal_or_vectical_change(curr_pos, prev_pos)
+            # Previous move is a vertical move, so now need a horizontal move
+            if prev_move:
+                if conf.dia_East:
+                    return src_dia_east(curr_pos)
+                elif conf.dia_West:
+                    return src_dia_west(curr_pos)
+            else:
+                if conf.dia_North:
+                    return src_dia_north(curr_pos)
+                elif conf.dia_South:
+                    return src_dia_south(curr_pos)
+
+
+def get_source_dia_new_dir_and_pos(curr_pos: tuple) -> tuple:
+    # if already in the middle, stay
+    if curr_pos[0] == conf.MR and curr_pos[1] == conf.MC:
+        return int_to_dir[0], (curr_pos[0], curr_pos[1])
+
+    # if now reaches the middle point_x_axis
+    if curr_pos[1] == conf.MC:
+        # if needs to go to top
+        if conf.dia_North:
+            return src_dia_north(curr_pos)
+        # if needs to go to bottom
+        if conf.dia_South:
+            return src_dia_south(curr_pos)
+    # Always first reach the middle point_x_axis
+    # Also handle cases when we reach the same row as mid point
+    else:
+        # if needs to go to right
+        if conf.dia_East:
+            return src_dia_east(curr_pos)
+        # if needs to go to left
+        if conf.dia_West:
+            return src_dia_west(curr_pos)
 
 
 # Only needed if we need to control the movement of the source car
