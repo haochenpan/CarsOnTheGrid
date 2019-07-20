@@ -19,21 +19,23 @@ assert 0 <= SOURCE_POS[0] < X_MAX
 assert 0 <= SOURCE_POS[1] < Y_MAX
 
 
+def get_dist(x1, y1, x2, y2):
+    pass
+    dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+    return dist
+
+
+"""
+    for RWP on torus shape map
+"""
+
+
 class Car:
-    """
-    does not specify target: random targets
-    specify one target same as pos: stand still
-    specify one target t1, t2, t3: generate random targets after t3
-    specify one target t1, t2, t3, t3: stand still after t3
-
-
-    """
-
-    def __init__(self, index, seed, is_source, pos=None, targets=None):
+    def __init__(self, index, seed, pos=None, targets=None):
         assert 0 <= index
         self.index = index
+        self.when = 0 if index == 0 else -1
         self.rand = random.Random(f"{seed}+{self.index}")
-
         if pos is None:
             while True:
                 x_pos = self.rand.uniform(0, X_MAX)
@@ -41,106 +43,84 @@ class Car:
                 if x_pos != SOURCE_POS[0] or y_pos != SOURCE_POS[1]:
                     pos = (x_pos, y_pos)
                     break
-        self.trace = [pos]  # the init position + every valid step (after moving)
-        self.targets = [pos]  # the init position + every valid targets (after generation)
-
-        if is_source:
-            self.when = 0  # which round it becomes a broadcaster (-1: not a broadcaster now)
-        else:
-            self.when = -1
-
+        self.courses = [pos]
+        self.targets = [pos]
         if isinstance(targets, list):
             self.targets.extend(targets)
-        self.target_idx = 1  # the car is going for the 1st target (2nd elem in the list)
-
-    """
-        source's behaviour: if reach the final target, does not generate a target or move further
-        other cars: if reach the final target, generate a target and move further
-    """
+        self.target_idx = 1
 
     def move(self):
-        # if self.when == 0 and self.targets[self.target_idx] == self.targets[self.target_idx - 1]:  ##
-        #     return
-        step_rem = 1
-        while step_rem > 0:
-            step_rem = self._move(step_rem)
+        step = 1
+        while step > 0:
+            px, py = self.get_prev_target()
+            tx, ty = self.get_target()
+            if tx == px and ty == py:  # stand still
+                self.courses.append((tx, ty))
+                return
+            cx, cy = self.get_pos()
+            dist = get_dist(cx, cy, tx, ty)
+            if step >= dist:
+                self.courses.append((tx, ty))
+                self.target_idx += 1
+                step -= dist
+            else:
+                dx = (tx - cx) * step / dist
+                dy = (ty - cy) * step / dist
+                cx = cx + dx
+                cy = cy + dy
+                self.courses.append((cx, cy))
+                return
 
-    def _move(self, step):
-        tx, ty = self.get_target()
-        px = self.targets[self.target_idx - 1][0]
-        py = self.targets[self.target_idx - 1][1]
-        if tx == px and ty == py:
-            pos = (tx, ty)
-            self.trace.append(pos)
-            return -1
-
-        cx, cy = self.get_position()
-        dist = math.sqrt((tx - cx) ** 2 + (ty - cy) ** 2)
-        if step >= dist:
-            pos = (tx, ty)
-            self.trace.append(pos)
-            self.target_idx += 1
-            return step - dist
-        else:
-            dx = (tx - cx) * step / dist
-            dy = (ty - cy) * step / dist
-            cx = cx + dx
-            cy = cy + dy
-            self.trace.append((cx, cy))
-            return -1
-
-    def get_target(self):
-        """
-        get the target position. If there's no target, generate one
-        :return:
-        """
-        self._set_target()
-        tx = self.targets[self.target_idx][0]
-        ty = self.targets[self.target_idx][1]
-
-        return tx, ty
-
-    def _set_target(self):
-        if self.target_idx == len(self.targets):
-            tx = self.rand.uniform(0, X_MAX)
-            ty = self.rand.uniform(0, Y_MAX)
-            px = self.targets[self.target_idx - 1][0]
-            py = self.targets[self.target_idx - 1][1]
-            if tx != px or ty != py:
-                self.targets.append((tx, ty))
-            if self.when == 0:
-                print("the source is generating a target to go, at rd=", len(self.trace))
-
-    def get_position(self):
-        cx = self.trace[-1][0]
-        cy = self.trace[-1][1]
+    def get_pos(self):
+        cx = self.courses[-1][0]
+        cy = self.courses[-1][1]
         return cx, cy
 
-    def get_dist(self, ax, ay):
-        """
-        get dist from (ax, ay) to the current position
-        :param ax:
-        :param ay:
-        :return:
-        """
-        cx, cy = self.get_position()
-        dist = math.sqrt((ax - cx) ** 2 + (ay - cy) ** 2)
-        return dist
+    def get_target(self):
+        self.set_target()
+        tx = self.targets[self.target_idx][0]
+        ty = self.targets[self.target_idx][1]
+        return tx, ty
+
+    def get_prev_target(self):
+        px = self.targets[self.target_idx - 1][0]
+        py = self.targets[self.target_idx - 1][1]
+        return px, py
+
+    def set_target(self):
+        if self.target_idx == len(self.targets):
+            cx, cy = self.get_pos()
+            x_max = cx + 0.5 * X_MAX
+            x_min = cx - 0.5 * X_MAX
+            y_max = cy + 0.5 * Y_MAX
+            y_min = cy - 0.5 * Y_MAX
+            tx = self.rand.uniform(x_min, x_max)
+            ty = self.rand.uniform(y_min, y_max)
+
+            px, py = self.get_prev_target()
+            while tx == px and ty == py:
+                tx = self.rand.uniform(x_min, x_max)
+                ty = self.rand.uniform(y_min, y_max)
+
+            self.targets.append((tx, ty))
+            if self.when == 0:
+                print("the source is generating a target at rd=", len(self.courses) - 1)
 
     def truncate(self):
-        self.get_target()
-        self.trace = self.trace[-1:]
+        self.set_target()
+        self.courses = self.courses[-1:]
         self.targets = self.targets[-2:]
         self.target_idx = 1
 
 
 class Simulation:
-    def __init__(self, seed, source_targets):
+    def __init__(self, seed, source_targets=None):
         self.cars = []
-        c1 = Car(0, seed, True, SOURCE_POS, source_targets)
+        c1 = Car(0, seed, SOURCE_POS, source_targets)
         self.cars.append(c1)
         for i in range(1, NUM_OF_CARS):
-            self.cars.append(Car(i, seed, False))
+            cn = Car(i, seed)
+            self.cars.append(cn)
 
         self.num_of_broadcasters = []  # 0th round (after initialization), and after every move (w or w/o propagate)
         self.neighbor_percentage = []  # same as above
@@ -150,16 +130,17 @@ class Simulation:
             car.move()
 
     def propagate(self, rd):
-        broadcasters_list = []
-        for car in self.cars:
-            if car.when >= 0:
-                broadcasters_list.append(car.get_position())
+        bro_original_positions = [car.get_pos() for car in self.cars if car.when >= 0]
+        bro_truncated_positions = list(map(lambda pos: (pos[0] % X_MAX, pos[1] % Y_MAX), bro_original_positions))
 
-        for car in self.cars:
+        for i, car in enumerate(self.cars):
             if car.when == -1:
-                for ax, ay in broadcasters_list:
-                    if car.get_dist(ax, ay) <= 1:
+                car_x, car_y = car.get_pos()
+                car_x, car_y = car_x % X_MAX, car_y % Y_MAX
+                for bro_x, bro_y in bro_truncated_positions:
+                    if get_dist(car_x, car_y, bro_x, bro_y) <= 1:
                         car.when = rd
+                        break
 
     def calculate_num_of_broadcasters(self):
         broadcasters_cnt = 0
@@ -169,80 +150,54 @@ class Simulation:
         self.num_of_broadcasters.append(broadcasters_cnt)
 
     def calculate_neighbor_percentage(self):
-        """
-        warning: extremely time consuming
-        fortunately, we only need to run it a few times before simulation
-        :return:
-        """
+        original_positions = [car.get_pos() for car in self.cars]
+        truncated_positions = list(map(lambda pos: (pos[0] % X_MAX, pos[1] % Y_MAX), original_positions))
+
         rates = []
-        for car in self.cars:
-            num_of_nbrs = 0
-            for c in self.cars:
-                if c.get_dist(*car.get_position()) <= 1:
+        for x1, y1 in truncated_positions:
+            num_of_nbrs = -1  # minus itself
+            for x2, y2 in truncated_positions:
+                dist = get_dist(x1, y1, x2, y2)
+                if dist <= 1:
                     num_of_nbrs += 1
-            num_of_nbrs -= 1  # minus itself
             rate = num_of_nbrs / NUM_OF_CARS
             rates.append(rate)
-        self.neighbor_percentage.append(sum(rates) / NUM_OF_CARS)
+        self.neighbor_percentage.append(sum(rates))
 
-    def simulate(self, override=False):
-        """
-        override NUM OF MOVES so that the simulation continues until all cars received the msg
-        :param override:
-        :return:
-        """
-        # prepare - move all cars except the source
+    def simulate(self, exceed_num_of_moves=False):
         for _ in range(50):
             for car in self.cars[1:]:
                 car.move()
-        # prepare - truncate their traces and targets (for graphing)
         for car in self.cars[1:]:
             car.truncate()
-
-        # prepare - should be 1 before propagation
         self.calculate_num_of_broadcasters()
-        # self.calculate_neighbor_percentage()  ###
+        # self.calculate_neighbor_percentage()
+
         rd = 1
-        while self.num_of_broadcasters[-1] != len(self.cars):
+        while self.num_of_broadcasters[-1] != NUM_OF_CARS:
             self.cars_move()
             self.propagate(rd)
             self.calculate_num_of_broadcasters()
-            # self.calculate_neighbor_percentage()  ###
-            if not override and rd == NUM_OF_MOVES:
+            # self.calculate_neighbor_percentage()
+            # print(self.num_of_broadcasters[-1])
+            # print(self.neighbor_percentage[-1])
+            if not exceed_num_of_moves and rd == NUM_OF_MOVES:
                 break
             rd += 1
 
     def get_data(self):
-        traces = []
-        targets = []
-        for car in self.cars:
-            traces.append(car.trace)
-            targets.append(car.targets)
-        # whens = [car.when for car in self.cars]
-        # whens.sort()
-        # print(whens)
-        # print("the 1st car received the msg on rd=", whens[1])
-        # print("the last car received the msg on rd=", whens[-1])
-        # print("the 5% car received the msg on rd=", whens[int(len(whens) * 0.05)])
-        # print("the 95% car received the msg on rd=", whens[int(len(whens) * 0.95)])
-        # when = (whens[1], whens[-1], whens[int(len(whens) * 0.05)], whens[int(len(whens) * 0.95)])
-        # return traces, targets, self.num_of_broadcasters, self.neighbor_percentage, when
+        courses = [car.courses for car in self.cars]
+        targets = [car.targets for car in self.cars]
 
-        whens = [car.when for car in self.cars]
-        whens.sort()
-        when = whens[int(len(whens) * 0.95)]
-        # print("the 90th percentile is at round", when)
-        whens = [0 if car.when > when else 1 for car in self.cars]  # 0: 90% - 100%, 1: 0% - 90%
-        return traces, targets, self.num_of_broadcasters, self.neighbor_percentage, whens
+        return courses, targets, self.num_of_broadcasters, self.neighbor_percentage
 
 
 class GUI:
-    def __init__(self, traces, targets, broadcasters, neighbors, whens):
-        self.traces = traces
+    def __init__(self, courses, targets, broadcasters, neighbors):
+        self.courses = courses
         self.targets = targets
         self.broadcasters = broadcasters
         self.neighbors = neighbors
-        self.whens = whens
 
         self.fig = plt.figure(figsize=(18, 9))
         self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])
@@ -254,48 +209,27 @@ class GUI:
         self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])
 
     def draw(self):
-        # all traces and targets
-        # for trace in self.traces:
-        #     xys = list(zip(*trace))
-        #     xs = list(xys[0])
-        #     ys = list(xys[1])
-        #     self.ax1.plot(xs, ys, linewidth=1, marker='o', markersize=6)
-        # for target in self.targets:
-        #     xys = list(zip(*target))
-        #     xs = list(xys[0])
-        #     ys = list(xys[1])
-        #     self.ax1.plot(xs, ys, linewidth=1, marker="s", markersize=3)
+        for courses in self.courses:
+            last_x, last_y = courses[-1]
+            last_x, last_y = last_x % X_MAX, last_y % Y_MAX
+            self.ax1.plot(last_x, last_y, "go", markersize=2)
 
-        for i, trace in enumerate(self.traces):
-            last_x, last_y = trace[-1]
-            if self.whens[i] == 0:
-                self.ax1.plot(last_x, last_y, linewidth=1, marker='s', markersize=6)
-            else:
-                self.ax1.plot(last_x, last_y, linewidth=1, marker='o', markersize=3)
+        source_courses = self.courses[0]
+        xys = list(zip(*source_courses))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.ax1.plot(xs, ys, "bo", markersize=2)
 
-        # only source's traces and targets
-        trace = self.traces[0]
-        xys = list(zip(*trace))
-        xs = list(xys[0])
-        ys = list(xys[1])
-        self.ax1.plot(xs, ys, linewidth=1, marker='o', markersize=6)
-        #
-        target = self.targets[0]
-        xys = list(zip(*target))
-        xs = list(xys[0])
-        ys = list(xys[1])
-        self.ax1.plot(xs, ys, linewidth=1, marker="s", markersize=3)
+        source_targets = self.targets[0]
+        xys = list(zip(*source_targets))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.ax1.plot(xs, ys, "ro", markersize=4)
 
         self.ax1.set_xlabel("x axis")
         self.ax1.set_ylabel("y axis")
         self.ax1.set_title("source's position")
         self.ax1.grid(True)
-
-        # average MN neighbor percentage
-        # xs = [i for i in range(len(self.neighbors))]
-        # print(self.neighbors)
-        # self.ax2.plot(xs, self.neighbors, marker='o')
-        # self.ax2.grid(True)
 
         # round vs # of broadcasters
         xs = [i for i in range(len(self.broadcasters))]
@@ -308,6 +242,8 @@ class GUI:
 
     def show(self):
         plt.show()
+        plt.clf()
+        plt.close()
 
     def save(self, name):
         plt.tight_layout()
@@ -318,23 +254,6 @@ class GUI:
 
 if __name__ == '__main__':
     pass
-
-    # distribution: rounds needed to finish simulation vs frequency
-    # round vs source's area span
-    # how the center of the span is far away from the center of the field
-    # how borders of the span is far away from borders of the field
-    # TODO analysis some trend: area vs neighbor rate vs infection rate
-    # TODO: more unit tests
-    # RWM: # of broadcasters distribution
-
-    # want to investigate: how different if the source choose different routes
-    # if target is over, then stand still.3
-
-    # todo: quantative analysis
-    # 100? 500? 1000? how well they different
-    # torus shape map
-    # new mobility model
-
     r = redis.Redis(host='localhost', port=6379, db=0)
     targets = {
         # 0: [(100, 100), (0, 0), (100, 100)],
@@ -418,9 +337,8 @@ if __name__ == '__main__':
             # gui = GUI(*sim.get_data())
             # gui.draw()
             # gui.show()
-            # gui.save(f"{NUM_OF_CARS}:{RAND_SEED}:{k}:{len(gui.broadcasters) - 1}")
             results.append(len(sim.num_of_broadcasters) - 1)
             # print("round=", len(sim.num_of_broadcasters) - 1)
         print(results)
-        r_set_name = f"normal-{SOURCE_POS}-100"
+        r_set_name = f"torus-{SOURCE_POS}-100"
         r.sadd(r_set_name, str((RAND_SEED, results)))
