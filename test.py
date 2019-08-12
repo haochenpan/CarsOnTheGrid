@@ -48,26 +48,7 @@ class Car:
         self.target_idx = 1
 
 
-class RWP1Car(Car):
-    def set_target(self):
-        if self.target_idx == len(self.targets):
-
-            px, py = self.get_prev_target()
-
-            # if source and reached the last target,
-            # append the previous target so that it won't
-            # generate a new one
-            if self.index == 0:
-                self.targets.append((px, py))
-                return
-
-            tx = self.rand.uniform(0, X_MAX)
-            ty = self.rand.uniform(0, Y_MAX)
-            while tx == px and ty == py:
-                tx = self.rand.uniform(0, X_MAX)
-                ty = self.rand.uniform(0, Y_MAX)
-            self.targets.append((tx, ty))
-
+class SynCar(Car):
     def move(self):
         step = 1
         while step > 0:
@@ -97,7 +78,28 @@ class RWP1Car(Car):
                 return
 
 
-class RWP2Car(RWP1Car):
+class RWP1Car(SynCar):
+    def set_target(self):
+        if self.target_idx == len(self.targets):
+
+            px, py = self.get_prev_target()
+
+            # if source and reached the last target,
+            # append the previous target so that it won't
+            # generate a new one
+            if self.index == 0:
+                self.targets.append((px, py))
+                return
+
+            tx = self.rand.uniform(0, X_MAX)
+            ty = self.rand.uniform(0, Y_MAX)
+            while tx == px and ty == py:
+                tx = self.rand.uniform(0, X_MAX)
+                ty = self.rand.uniform(0, Y_MAX)
+            self.targets.append((tx, ty))
+
+
+class RWP2Car(SynCar):
     def set_target(self):
         if self.target_idx == len(self.targets):
             px, py = self.get_prev_target()
@@ -122,11 +124,50 @@ class RWP2Car(RWP1Car):
             self.targets.append((tx, ty))
 
 
+class RDCar(SynCar):
+    def set_target(self):
+        if self.target_idx == len(self.targets):
+            px, py = self.get_prev_target()
+
+            # if source and reached the last target,
+            # append the previous target so that it won't
+            # generate a new one
+            if self.index == 0:
+                self.targets.append((px, py))
+                return
+
+            max_target = 2 * X_MAX + 2 * Y_MAX
+            while True:
+                raw_target = self.rand.uniform(0, max_target)
+                if 0 <= raw_target < X_MAX:
+                    target = (raw_target, 0)
+                elif X_MAX <= raw_target < X_MAX + Y_MAX:
+                    raw_target -= X_MAX
+                    target = (X_MAX, raw_target)
+                elif X_MAX + Y_MAX <= raw_target < 2 * X_MAX + Y_MAX:
+                    raw_target -= (X_MAX + Y_MAX)
+                    target = ((X_MAX - raw_target), Y_MAX)
+                else:
+                    raw_target -= (2 * X_MAX + Y_MAX)
+                    target = (0, (Y_MAX - raw_target))
+
+                if px == 0 and target[0] == 0:
+                    continue
+                if px == X_MAX and target[0] == X_MAX:
+                    continue
+                if py == 0 and target[1] == 0:
+                    continue
+                if py == Y_MAX and target[1] == Y_MAX:
+                    continue
+                break
+            self.targets.append(target)
+
+
 class Simulation:
     def __init__(self):
-        self.cars = [CAR_CLASS(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE)]
-        self.cars.extend([CAR_CLASS(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
-
+        # self.cars = [CAR_CLASS(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE)]
+        # self.cars.extend([CAR_CLASS(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+        self.cars = []
         self.num_of_broadcasters = []
         self.neighbor_percentage = []
 
@@ -174,7 +215,7 @@ class Simulation:
         return courses, targets, self.num_of_broadcasters, self.neighbor_percentage
 
 
-class RWP1Simulation(Simulation):
+class SynSimulation(Simulation):
     def propagate(self, rd):
         broadcaster_pos_list = [car.get_pos() for car in self.cars if car.when >= 0]
         for car in self.cars:
@@ -197,10 +238,22 @@ class RWP1Simulation(Simulation):
         self.neighbor_percentage.append((sum(rates) / NUM_OF_CARS))
 
 
+class RWP1Simulation(SynSimulation):
+    def __init__(self):
+        super().__init__()
+        self.cars.append(RWP1Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
+        self.cars.extend([RWP1Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+
+
 class RWP2Simulation(Simulation):
+    def __init__(self):
+        super().__init__()
+        self.cars.append(RWP2Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
+        self.cars.extend([RWP2Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+
     def propagate(self, rd):
         broadcaster_pos_list = [car.get_pos() for car in self.cars if car.when >= 0]
-        mod_pos_list = list(map(lambda pos: (pos[0] % X_MAX, pos[1] % Y_MAX), broadcaster_pos_list))
+        mod_pos_list = list(map(lambda p: (p[0] % X_MAX, p[1] % Y_MAX), broadcaster_pos_list))
         for car in self.cars:
             if car.when == -1:
                 car_x, car_y = car.get_pos()
@@ -225,6 +278,13 @@ class RWP2Simulation(Simulation):
         self.neighbor_percentage.append((sum(rates) / NUM_OF_CARS))
 
 
+class RDSimulation(SynSimulation):
+    def __init__(self):
+        super().__init__()
+        self.cars.append(RDCar(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
+        self.cars.extend([RDCar(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+
+
 class GUI:
     def __init__(self, courses, targets, num_of_broadcasters, neighbor_percentage):
         self.courses = courses
@@ -233,20 +293,33 @@ class GUI:
         self.neighbor_percentage = neighbor_percentage
 
         self.fig = plt.figure(figsize=(18, 9))
+        # self.fig = plt.figure(figsize=(18 * 5, 9 * 5))   # for ax4's text
         # self.fig = plt.figure(figsize=(27, 9))  ###
+
         self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])  ###
         self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
         self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
 
         # self.ax2 = self.fig.add_subplot(132, xlim=[0, NUM_OF_MOVES], ylim=[0, 0.002])  ###
-        x_max = NUM_OF_MOVES if len(self.num_of_broadcasters) <= NUM_OF_MOVES else len(self.num_of_broadcasters)
-        self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])  ###
+
+        # x_max = NUM_OF_MOVES if len(self.num_of_broadcasters) <= NUM_OF_MOVES else len(self.num_of_broadcasters)
+        # self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])  ###
+
+        self.ax4 = self.fig.add_subplot(122)
 
     def draw(self):
+
+        # print all cars' init pos
         for course in self.courses:
             first_x, first_y = course[0]
-            # print(first_x, first_y)
             self.ax1.plot(first_x, first_y, "go", markersize=2)
+
+        # for RD, to validate target positions
+        for car_targets in self.targets:
+            xys = list(zip(*car_targets))
+            xs = list(map(lambda x: x, list(xys[0])))
+            ys = list(map(lambda y: y, list(xys[1])))
+            self.ax1.plot(xs, ys, "ro", markersize=2)
 
         # source_courses = self.courses[0]
         # xys = list(zip(*source_courses))
@@ -271,13 +344,36 @@ class GUI:
         # self.ax2.grid(True)
 
         # round vs # of broadcasters
-        xs = [i for i in range(len(self.num_of_broadcasters))]
-        self.ax3.plot(xs, self.num_of_broadcasters, marker='o', markersize=3)
+        # xs = [i for i in range(len(self.num_of_broadcasters))]
+        # self.ax3.plot(xs, self.num_of_broadcasters, marker='o', markersize=3)
+        #
+        # self.ax3.set_xlabel("simulation round")
+        # self.ax3.set_ylabel("# of msg received cars")
+        # self.ax3.set_title("# of msg received cars vs. simulation round \n")
+        # self.ax3.grid(True)
 
-        self.ax3.set_xlabel("simulation round")
-        self.ax3.set_ylabel("# of msg received cars")
-        self.ax3.set_title("# of msg received cars vs. simulation round \n")
-        self.ax3.grid(True)
+        # hot map
+        hot_map = [[0 for _ in range(X_MAX)] for _ in range(Y_MAX)]
+        for i, car_targets in enumerate(self.courses):
+            if i == 0:
+                continue
+            for j, target in enumerate(car_targets):
+                int_target_x = int(target[0]) % X_MAX
+                int_target_y = int(target[1]) % Y_MAX
+                hot_map[int_target_y][int_target_x] += 1
+        for row in hot_map:
+            print(row)
+        #
+        print("len(self.courses)", len(self.courses))
+        print("len(self.num_of_broadcasters) -1 =", len(self.num_of_broadcasters) - 1)
+        im = self.ax4.imshow(hot_map)
+        # for i in range(Y_MAX):
+        #     for j in range(X_MAX):
+        #         text = self.ax4.text(j, i, hot_map[i][j], ha="center", va="center", color="w")
+        self.ax4.set_title("trace hot map")
+
+        cbar = self.fig.colorbar(im, ax=self.ax4)
+        cbar.ax.set_ylabel("trace hot map", rotation=-90, va="bottom")
 
     def show(self):
         plt.show()
@@ -292,67 +388,12 @@ class GUI:
 
 
 if __name__ == '__main__':
-    pos1_list, pos2_list, pos3_list, pos4_list, pos5_list = [], [], [], [], []
-    CAR_CLASS = RWP2Car
+    pass
+    RAND_SEED = "%.20f" % time.time()
     SOURCE_COURSE = []
-    SOURCE_POS = (0, 0)
-    PRE_RUN_COUNT = 100
 
-    for i in range(50):
-        RAND_SEED = "%.20f" % time.time()
-        SOURCE_POS = (0, 0)
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        pos1_list.append(len(sim1.num_of_broadcasters) - 1)
-        # pos1_list.append(get_index(sim1.num_of_broadcasters))
-
-        SOURCE_POS = (5, 5)
-        sim2 = RWP2Simulation()
-        sim2.simulate()
-        pos2_list.append(len(sim2.num_of_broadcasters) - 1)
-        #
-        SOURCE_POS = (25, 25)
-        sim3 = RWP2Simulation()
-        sim3.simulate()
-        pos3_list.append(len(sim3.num_of_broadcasters) - 1)
-
-        SOURCE_POS = (50, 50)
-        sim4 = RWP2Simulation()
-        sim4.simulate()
-        pos4_list.append(len(sim4.num_of_broadcasters) - 1)
-        #
-        SOURCE_POS = (75, 75)
-        sim5 = RWP2Simulation()
-        sim5.simulate()
-        pos5_list.append(len(sim5.num_of_broadcasters) - 1)
-        #
-        print("sim 1 rounds to finish: ", len(sim1.num_of_broadcasters) - 1)
-        print("sim 2 rounds to finish: ", len(sim2.num_of_broadcasters) - 1)
-        print("sim 3 rounds to finish: ", len(sim3.num_of_broadcasters) - 1)
-        print("sim 4 rounds to finish: ", len(sim4.num_of_broadcasters) - 1)
-        print("sim 5 rounds to finish: ", len(sim5.num_of_broadcasters) - 1)
-
-        # gui = GUI(*sim1.summary())
-        # gui.draw()
-        # gui.save(f"{i}-{RAND_SEED}-1")
-        # gui = GUI(*sim2.summary())
-        # gui.draw()
-        # gui.save(f"{i}-{RAND_SEED}-2")
-        # gui = GUI(*sim3.summary())
-        # gui.draw()
-        # gui.save(f"{i}-{RAND_SEED}-3")
-        # gui = GUI(*sim4.summary())
-        # gui.draw()
-        # gui.save(f"{i}-{RAND_SEED}-4")
-        # gui = GUI(*sim5.summary())
-        # gui.draw()
-        # gui.save(f"{i}-{RAND_SEED}-5")
-
-    print(pos1_list, sum(pos1_list), sum(pos1_list) / len(pos1_list))
-    print(pos2_list, sum(pos2_list), sum(pos2_list) / len(pos2_list))
-    print(pos3_list, sum(pos3_list), sum(pos3_list) / len(pos3_list))
-    print(pos4_list, sum(pos4_list), sum(pos4_list) / len(pos4_list))
-    print(pos5_list, sum(pos5_list), sum(pos5_list) / len(pos5_list))
-    # gui = GUI(*sim.summary())
-    # gui.draw()
-    # gui.show()
+    sim1 = RDSimulation()
+    sim1.simulate()
+    gui = GUI(*sim1.summary())
+    gui.draw()
+    gui.save("aaa")
