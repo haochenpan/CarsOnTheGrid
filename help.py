@@ -11,7 +11,7 @@ Y_MAX = 100
 NUM_OF_CARS = 500
 NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100
-SOURCE_POS = (50, 50)
+SOURCE_POS = (0, 0)
 EXCEED_MOVES = True
 
 assert 0 < X_MAX
@@ -35,5 +35,3 @@ def get_euclidean_dist(x1, y1, x2, y2):
 
 if __name__ == '__main__':
     pass
-    print(get_euclidean_dist(*(85, 95), *(75, 25)))
-    print(get_dist(*(85, -5), *(75, 25)))

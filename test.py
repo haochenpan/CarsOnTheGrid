@@ -63,6 +63,8 @@ class SynCar(Car):
 
             cx, cy = self.get_pos()
             dist = get_dist(cx, cy, tx, ty)
+            # if dist != 1:
+            #     print("errpr!", cx, cy, tx, ty)
             if step >= dist:
                 pos = (tx, ty)
                 self.courses.append(pos)
@@ -161,6 +163,160 @@ class RDCar(SynCar):
                     continue
                 break
             self.targets.append(target)
+
+
+class MG1Car(Car):
+    def __init__(self, index, seed, pos=None, targets=None):
+        super().__init__(index, seed, pos, targets)
+        if pos is None:
+            while True:
+                x_pos = self.rand.choice([i for i in range(0, X_MAX + 1)])
+                y_pos = self.rand.choice([i for i in range(0, Y_MAX + 1)])
+                if x_pos != SOURCE_POS[0] or y_pos != SOURCE_POS[1]:
+                    pos = (x_pos, y_pos)
+                    assert x_pos == int(x_pos)
+                    assert y_pos == int(y_pos)
+                    break
+        self.courses = [pos]
+        self.targets = [pos]
+        if targets is not None: self.targets.extend(targets)
+
+    def move(self):
+        px, py = self.get_prev_target()
+        tx, ty = self.get_target()
+        if px != tx or py != ty:
+            self.target_idx += 1
+        self.courses.append((tx, ty))
+
+    def set_target(self):
+        if self.target_idx == len(self.targets):
+
+            px, py = self.get_prev_target()
+
+            # if source and reached the last target,
+            # append the previous target so that it won't
+            # generate a new one
+            if self.index == 0:
+                self.targets.append((px, py))
+                return
+
+            cx, cy = self.get_pos()
+            dirs = [(cx - 1, cy), (cx + 1, cy), (cx, cy - 1), (cx, cy + 1)]
+            if cx == 0:
+                dirs.remove((cx - 1, cy))
+            elif cx == X_MAX:
+                dirs.remove((cx + 1, cy))
+            if cy == 0:
+                dirs.remove((cx, cy - 1))
+            elif cy == Y_MAX:
+                dirs.remove((cx, cy + 1))
+            assert len(dirs) in [2, 3, 4]
+            if len(dirs) == 2:
+                weights = [0.5 for _ in range(2)]
+            elif len(dirs) == 3:
+                weights = [1 / 3 for _ in range(3)]
+            else:
+                weights = [0.25 for _ in range(4)]
+
+            if len(self.courses) == 1:
+                dir = self.rand.choices(dirs, weights)
+                assert len(dir) == 1
+                dir = dir[0]
+            else:
+                last_x, last_y = self.courses[-2]
+                assert (last_x, last_y) in dirs
+                last_idx = dirs.index((last_x, last_y))
+
+                if (last_x, last_y) == (cx - 1, cy):
+                    opposite = (cx + 1, cy)
+                elif (last_x, last_y) == (cx + 1, cy):
+                    opposite = (cx - 1, cy)
+                elif (last_x, last_y) == (cx, cy - 1):
+                    opposite = (cx, cy + 1)
+                else:
+                    opposite = (cx, cy - 1)
+
+                plus_idx = dirs.index(opposite) if opposite in dirs else -1
+                plus_weight, weights[last_idx] = weights[last_idx], 0
+                if plus_idx != -1:
+                    weights[plus_idx] += plus_weight
+                else:
+                    for i, wei in enumerate(weights):
+                        if wei != 0:
+                            weights[i] = wei + plus_weight * (1 / (len(weights) - 1))
+                dir = self.rand.choices(dirs, weights)
+                assert len(dir) == 1
+                dir = dir[0]
+            self.targets.append(dir)
+
+
+class MG2Car(MG1Car):
+    def __init__(self, index, seed, pos=None, targets=None):
+        super().__init__(index, seed, pos, targets)
+        if pos is None:
+            while True:
+                x_pos = self.rand.choice([i for i in range(0, X_MAX)])
+                y_pos = self.rand.choice([i for i in range(0, Y_MAX)])
+                if x_pos != SOURCE_POS[0] or y_pos != SOURCE_POS[1]:
+                    pos = (x_pos, y_pos)
+                    assert x_pos == int(x_pos)
+                    assert y_pos == int(y_pos)
+                    break
+        self.courses = [pos]
+        self.targets = [pos]
+        if targets is not None: self.targets.extend(targets)
+
+    def set_target(self):
+        if self.target_idx == len(self.targets):
+
+            px, py = self.get_prev_target()
+
+            # if source and reached the last target,
+            # append the previous target so that it won't
+            # generate a new one
+            if self.index == 0:
+                self.targets.append((px, py))
+                return
+
+            cx, cy = self.get_pos()
+            dirs = [(cx - 1, cy), (cx + 1, cy), (cx, cy - 1), (cx, cy + 1)]
+            dirs = [(x % X_MAX, y % Y_MAX) for (x, y) in dirs]
+            weights = [0.25 for _ in range(4)]
+
+            if len(self.courses) == 1:
+                dir = self.rand.choices(dirs, weights)
+                assert len(dir) == 1
+                dir = dir[0]
+            else:
+                last_x, last_y = self.courses[-2]
+                # print("self.index", self.index)
+                # print("self.courses", self.courses)
+                last_x, last_y = last_x % X_MAX, last_y % Y_MAX
+                # print("(last_x, last_y)", (last_x, last_y))
+                # print("dirs", dirs)
+                assert (last_x, last_y) in dirs
+                last_idx = dirs.index((last_x, last_y))
+
+                if (last_x, last_y) == ((cx - 1) % X_MAX, cy % Y_MAX):
+                    opposite = (cx + 1, cy)
+                elif (last_x, last_y) == ((cx + 1) % X_MAX, cy % Y_MAX):
+                    opposite = (cx - 1, cy)
+                elif (last_x, last_y) == (cx % X_MAX, (cy - 1) % Y_MAX):
+                    opposite = (cx, cy + 1)
+                else:
+                    opposite = (cx, cy - 1)
+                opposite = opposite[0] % X_MAX, opposite[1] % Y_MAX
+
+                # in torus map, the opposite is always an option
+                plus_idx = dirs.index(opposite)
+                plus_weight, weights[last_idx] = weights[last_idx], 0
+                weights[plus_idx] += plus_weight
+
+                dir = self.rand.choices(dirs, weights)
+                assert len(dir) == 1
+                dir = dir[0]
+            # dir = round(dir[0], 0), round(dir[1], 0)
+            self.targets.append(dir)
 
 
 class Simulation:
@@ -285,6 +441,20 @@ class RDSimulation(SynSimulation):
         self.cars.extend([RDCar(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
 
 
+class MG1Simulation(SynSimulation):
+    def __init__(self):
+        super().__init__()
+        self.cars.append(MG1Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
+        self.cars.extend([MG1Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+
+
+class MG2Simulation(SynSimulation):
+    def __init__(self):
+        super().__init__()
+        self.cars.append(MG2Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
+        self.cars.extend([MG2Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+
+
 class GUI:
     def __init__(self, courses, targets, num_of_broadcasters, neighbor_percentage):
         self.courses = courses
@@ -315,11 +485,11 @@ class GUI:
             self.ax1.plot(first_x, first_y, "go", markersize=2)
 
         # for RD, to validate target positions
-        for car_targets in self.targets:
-            xys = list(zip(*car_targets))
-            xs = list(map(lambda x: x, list(xys[0])))
-            ys = list(map(lambda y: y, list(xys[1])))
-            self.ax1.plot(xs, ys, "ro", markersize=2)
+        # for car_targets in self.targets:
+        #     xys = list(zip(*car_targets))
+        #     xs = list(map(lambda x: x, list(xys[0])))
+        #     ys = list(map(lambda y: y, list(xys[1])))
+        #     self.ax1.plot(xs, ys, "ro", markersize=2)
 
         # source_courses = self.courses[0]
         # xys = list(zip(*source_courses))
@@ -392,8 +562,13 @@ if __name__ == '__main__':
     RAND_SEED = "%.20f" % time.time()
     SOURCE_COURSE = []
 
-    sim1 = RDSimulation()
+    sim1 = MG2Simulation()
     sim1.simulate()
     gui = GUI(*sim1.summary())
     gui.draw()
     gui.save("aaa")
+
+    # c1 = MG2Car(1, RAND_SEED, SOURCE_POS)
+    # c1.set_target()
+    # print("c1.targets", c1.targets)
+    # print("c1.courses", c1.courses)
