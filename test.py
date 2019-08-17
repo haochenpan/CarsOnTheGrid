@@ -491,17 +491,18 @@ class GUI:
         #     ys = list(map(lambda y: y, list(xys[1])))
         #     self.ax1.plot(xs, ys, "ro", markersize=2)
 
-        # source_courses = self.courses[0]
-        # xys = list(zip(*source_courses))
-        # xs = list(map(lambda x: x % X_MAX, list(xys[0])))
-        # ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
-        # self.ax1.plot(xs, ys, "bo", markersize=2)
-        #
-        # source_targets = self.targets[0]
-        # xys = list(zip(*source_targets))
-        # xs = list(map(lambda x: x % X_MAX, list(xys[0])))
-        # ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
-        # self.ax1.plot(xs, ys, "ro", markersize=4)
+        source_courses = self.courses[0]
+        xys = list(zip(*source_courses))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.ax1.plot(xs, ys, "bo", markersize=2)
+
+        source_targets = self.targets[0]
+        # print(source_targets)
+        xys = list(zip(*source_targets))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.ax1.plot(xs, ys, "ro", markersize=4)
 
         self.ax1.set_xlabel("x axis")
         self.ax1.set_ylabel("y axis")
@@ -531,8 +532,8 @@ class GUI:
                 int_target_x = int(target[0]) % X_MAX
                 int_target_y = int(target[1]) % Y_MAX
                 hot_map[int_target_y][int_target_x] += 1
-        for row in hot_map:
-            print(row)
+        # for row in hot_map:
+        #     print(row)
         #
         print("len(self.courses)", len(self.courses))
         print("len(self.num_of_broadcasters) -1 =", len(self.num_of_broadcasters) - 1)
@@ -556,19 +557,54 @@ class GUI:
         plt.clf()
         plt.close()
 
-
+class GUI2:
+    
 if __name__ == '__main__':
     pass
-    RAND_SEED = "%.20f" % time.time()
-    SOURCE_COURSE = []
+    finish_dict = defaultdict(lambda: [])
 
-    sim1 = MG2Simulation()
-    sim1.simulate()
-    gui = GUI(*sim1.summary())
-    gui.draw()
-    gui.save("aaa")
+    for i in range(500):
+        print(i)
+        RAND_SEED = "%.20f" % time.time()
 
-    # c1 = MG2Car(1, RAND_SEED, SOURCE_POS)
-    # c1.set_target()
-    # print("c1.targets", c1.targets)
-    # print("c1.courses", c1.courses)
+        SOURCE_COURSE = get_targets_1()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rounds = len(sim1.num_of_broadcasters) - 1
+        finish_dict[1].append(rounds)
+
+        SOURCE_COURSE = [(3200, 3200)]
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rounds = len(sim1.num_of_broadcasters) - 1
+        finish_dict[2].append(rounds)
+
+        SOURCE_COURSE = get_targets_4()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rounds = len(sim1.num_of_broadcasters) - 1
+        finish_dict[3].append(rounds)
+
+        # SOURCE_COURSE = get_targets_2()
+        # SOURCE_COURSE = [(-3200, -3200)]
+        # sim1 = RWP2Simulation()
+        # sim1.simulate()
+        # rounds = len(sim1.num_of_broadcasters) - 1
+        # finish_dict[4].append(rounds)
+        #
+        # SOURCE_COURSE = [(3200, 1600)]
+        # sim1 = RWP2Simulation()
+        # sim1.simulate()
+        # rounds = len(sim1.num_of_broadcasters) - 1
+        # finish_dict[5].append(rounds)
+        #
+        # SOURCE_COURSE = [(-1600, 3200)]
+        # sim1 = RWP2Simulation()
+        # sim1.simulate()
+        # rounds = len(sim1.num_of_broadcasters) - 1
+        # finish_dict[6].append(rounds)
+
+    summ = []
+    for k, v in finish_dict.items():
+        summ.append((k, sum(v) / len(v)))
+    print(sorted(summ, key=lambda e: e[1]))
