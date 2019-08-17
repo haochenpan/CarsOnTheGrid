@@ -14,6 +14,8 @@ NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100
 SOURCE_POS = (0, 0)
 EXCEED_MOVES = True
+RAND_SEED = "%.20f" % time.time()
+SOURCE_COURSE = []
 
 assert 0 < X_MAX
 assert 0 < Y_MAX
@@ -36,49 +38,12 @@ def get_euclidean_dist(x1, y1, x2, y2):
 
 def get_targets_1():  # RWP2
     targets = []
-    for i in range(0, 1600, 4):
-        tgts = [(i, i), (i + 1, i + 3), (i + 3, i + 1)]
-        targets.extend(tgts)
-    # targets.append((400, 400))
-    return targets[1:]
-
-
-def get_targets_2():  # RWP2
-    targets = []
-    for i in range(0, 1600, 5):
-        tgts = [(i, i), (i + 1, i + 4), (i + 4, i + 1)]
-        targets.extend(tgts)
-    # targets.append((400, 400))
-    return targets[1:]
-
-
-def get_targets_3():  # RWP2
-    targets = []
-    for i in range(0, 1600, 5):
-        tgts = [(i, i), (i + 2, i + 3), (i + 3, i + 2)]
-        targets.extend(tgts)
-    # targets.append((400, 400))
-    return targets[1:]
-
-
-def get_targets_4():  # RWP2
-    targets = []
-    for i in range(0, 1600, 5):
+    for i in range(0, 3200, 5):
         tgts = [(i, i), (i + 1, i + 3), (i + 4, i + 2)]
-        # tgts = [(i, i), (i + 2, i + 2), (i + 1, i + 4), (i + 4, i + 1), (i + 3, i + 3)]
         targets.extend(tgts)
-    # targets.append((400, 400))
     return targets[1:]
-
-
-def get_targets_5():  # RWP2
-    targets = []
-    for i in range(100):
-        tgts = [(10, 10), (20, 0), (10, -10), (0, 0)]
-        targets.extend(tgts)
-    return targets
 
 
 if __name__ == '__main__':
     pass
-    print(get_targets_5())
+    print(get_targets_1())

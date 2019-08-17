@@ -1,6 +1,5 @@
 from help import *
 
-
 class Car:
     def __init__(self, index, seed, pos=None, targets=None):
         assert 0 <= index
@@ -557,54 +556,95 @@ class GUI:
         plt.clf()
         plt.close()
 
+
 class GUI2:
-    
+    def __init__(self, sim: Simulation):
+        self.sim = sim
+        self.fig = plt.figure(figsize=(9 * 3, 9 * 2))
+        self.axs = []
+        for i in range(6):
+            axi = self.fig.add_subplot(int(f"23{i + 1}"), xlim=[0, X_MAX], ylim=[0, Y_MAX])
+            axi.set_xticks(np.arange(0, X_MAX + 1, 5))
+            axi.set_yticks(np.arange(0, Y_MAX + 1, 5))
+            self.axs.append(axi)
+
+    def draw(self):
+        incr = 40
+        for i in range(6):
+            for car in self.sim.cars:
+                x, y = car.courses[i * incr]
+                x = x % X_MAX
+                y = y % Y_MAX
+                if car.when <= i * incr + 1:
+                    self.axs[i].plot(x, y, "go", markersize=4)
+                else:
+                    self.axs[i].plot(x, y, "ro", markersize=4)
+
+            source_courses = self.sim.cars[0].courses[:i * incr + 1]
+            xys = list(zip(*source_courses))
+            xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+            ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+            self.axs[i].plot(xs, ys, "bo", markersize=2)
+            self.axs[i].grid(True)
+
+    def show(self):
+        plt.show()
+        plt.clf()
+        plt.close()
+
+    def save(self, name):
+        plt.tight_layout()
+        plt.savefig(f"{name}.png")
+        plt.clf()
+        plt.close()
+
+
+class GUI3:
+    def __init__(self, names, records):
+        assert len(names) == len(records)
+        self.names = names
+        self.records = records
+
+        low = min(records[0])
+        hi = max(records[0])
+        for record in records:
+            l_low = min(record)
+            if l_low < low:
+                low = l_low
+            l_hi = max(record)
+            if l_hi > hi:
+                hi = l_hi
+        self.lo = low
+        self.hi = hi
+
+        self.fig = plt.figure(figsize=(36, 9))
+        self.axs = []
+        for i in range(len(names)):
+            axi = self.fig.add_subplot(int(f"{len(names)}1{i + 1}"))
+            self.axs.append(axi)
+
+    def draw(self):
+        for i in range(len(self.names)):
+            self.axs[i].grid(True)
+            y_pos = list(range(self.lo, self.hi + 1))
+            x_bars = [0 for i in y_pos]
+            for record in self.records[i]:
+                x_bars[(record - self.lo)] += 1
+            print(x_bars)
+            self.axs[i].bar(y_pos, x_bars)
+            self.axs[i].set_title(self.names[i])
+
+    def show(self):
+        plt.show()
+        plt.clf()
+        plt.close()
+
+    def save(self, name):
+        plt.tight_layout()
+        plt.savefig(f"{name}.png")
+        plt.clf()
+        plt.close()
+
+
 if __name__ == '__main__':
     pass
-    finish_dict = defaultdict(lambda: [])
-
-    for i in range(500):
-        print(i)
-        RAND_SEED = "%.20f" % time.time()
-
-        SOURCE_COURSE = get_targets_1()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rounds = len(sim1.num_of_broadcasters) - 1
-        finish_dict[1].append(rounds)
-
-        SOURCE_COURSE = [(3200, 3200)]
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rounds = len(sim1.num_of_broadcasters) - 1
-        finish_dict[2].append(rounds)
-
-        SOURCE_COURSE = get_targets_4()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rounds = len(sim1.num_of_broadcasters) - 1
-        finish_dict[3].append(rounds)
-
-        # SOURCE_COURSE = get_targets_2()
-        # SOURCE_COURSE = [(-3200, -3200)]
-        # sim1 = RWP2Simulation()
-        # sim1.simulate()
-        # rounds = len(sim1.num_of_broadcasters) - 1
-        # finish_dict[4].append(rounds)
-        #
-        # SOURCE_COURSE = [(3200, 1600)]
-        # sim1 = RWP2Simulation()
-        # sim1.simulate()
-        # rounds = len(sim1.num_of_broadcasters) - 1
-        # finish_dict[5].append(rounds)
-        #
-        # SOURCE_COURSE = [(-1600, 3200)]
-        # sim1 = RWP2Simulation()
-        # sim1.simulate()
-        # rounds = len(sim1.num_of_broadcasters) - 1
-        # finish_dict[6].append(rounds)
-
-    summ = []
-    for k, v in finish_dict.items():
-        summ.append((k, sum(v) / len(v)))
-    print(sorted(summ, key=lambda e: e[1]))
