@@ -9,7 +9,7 @@ from collections import defaultdict
 
 X_MAX = 100
 Y_MAX = 100
-NUM_OF_CARS = 50
+NUM_OF_CARS = 100
 NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100
 SOURCE_POS = (0, 0)
@@ -36,14 +36,68 @@ def get_euclidean_dist(x1, y1, x2, y2):
     return math.sqrt(comp1 + comp2)
 
 
-def get_targets_1():  # RWP2
+def get_targets_t11():
     targets = []
-    for i in range(0, 3200, 5):
-        tgts = [(i, i), (i + 1, i + 3), (i + 4, i + 2)]
+    for i in range(0, 25, 5):
+        tgts = [(i, i), (i + 2, i + 5), (i + 3, i)]
         targets.extend(tgts)
+    targets.append((25, 25))
+    targets.append((3600, 3600))
     return targets[1:]
 
 
+def get_targets_t12():
+    targets = []
+    for i in range(0, 50, 5):
+        tgts = [(i, i), (i + 2, i + 5), (i + 3, i)]
+        targets.extend(tgts)
+    targets.append((50, 50))
+    targets.append((3600, 3600))
+    return targets[1:]
+
+
+def get_targets_t13():
+    targets = []
+    for i in range(0, 75, 5):
+        tgts = [(i, i), (i + 2, i + 5), (i + 3, i)]
+        targets.extend(tgts)
+    targets.append((75, 75))
+    targets.append((3600, 3600))
+    return targets[1:]
+
+
+def get_targets_t2():
+    targets = []
+    for i in range(0, 50, 5):
+        tgts = [(i, i), (i + 2, i + 4), (i + 3, i + 1)]
+        targets.extend(tgts)
+    targets.append((50, 50))
+    targets.append((3600, 3600))
+    return targets[1:]
+
+
+def get_targets_t3():
+    targets = []
+    for i in range(0, 50, 5):
+        tgts = [(i, i), (i + 2, i + 3), (i + 3, i + 2)]
+        targets.extend(tgts)
+    targets.append((50, 50))
+    targets.append((3600, 3600))
+    return targets[1:]
+
+
+# def get_targets_c2():
+#     targets = []
+#     for i in range(0, 50, 5):
+#         tgts = [(i, i), (i + 1, i + 3), (i + 4, i + 2)]
+#         targets.extend(tgts)
+#
+#     targets.append((50, 50))
+#     targets.append((3600, 3600))
+#     return targets[1:]
+#
+#
+
 if __name__ == '__main__':
     pass
-    print(get_targets_1())
+    print(get_targets_c1())

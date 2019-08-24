@@ -1,4 +1,8 @@
 from help import *
+from redis import Redis
+
+r = Redis(host='localhost', port=6379, db=0)
+
 
 class Car:
     def __init__(self, index, seed, pos=None, targets=None):
@@ -647,4 +651,41 @@ class GUI3:
 
 
 if __name__ == '__main__':
-    pass
+    MOB = "RWP2"
+
+    for i in range(500):
+        print(i)
+        RAND_SEED = "%.20f" % time.time()
+
+        SOURCE_COURSE = [(3600, 3600)]
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rd = len(sim1.num_of_broadcasters) - 1
+        print(rd)
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s",
+               str((rd, RAND_SEED)))
+
+        SOURCE_COURSE = get_targets_t11()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rd = len(sim1.num_of_broadcasters) - 1
+        print(rd)
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t11",
+               str((rd, RAND_SEED)))
+        #
+        SOURCE_COURSE = get_targets_t12()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rd = len(sim1.num_of_broadcasters) - 1
+        print(rd)
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t12",
+               str((rd, RAND_SEED)))
+
+        SOURCE_COURSE = get_targets_t13()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rd = len(sim1.num_of_broadcasters) - 1
+        print(rd)
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t13",
+               str((rd, RAND_SEED)))
+#
