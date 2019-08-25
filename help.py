@@ -37,8 +37,15 @@ def get_euclidean_dist(x1, y1, x2, y2):
 
 
 def get_targets_s1():
-    # tgts = [(1, 10), (19, 10)]
-    tgts = [(10, 1), (10, 19)]
+    tgts = [(1, 10), (19, 10)]
+    targets = []
+    for i in range(1000):
+        targets.extend(tgts)
+    return targets
+
+
+def get_targets_t1():
+    tgts = [(1, 10), (10, 19), (19, 10), (10, 1)]
     targets = []
     for i in range(1000):
         targets.extend(tgts)
@@ -46,8 +53,15 @@ def get_targets_s1():
 
 
 def get_targets_s2():
-    # tgts = [(5, 10), (15, 10)]
-    tgts = [(10, 5), (10, 15)]
+    tgts = [(5, 10), (10, 15)]
+    targets = []
+    for i in range(1000):
+        targets.extend(tgts)
+    return targets
+
+
+def get_targets_t2():
+    tgts = [(5, 10), (10, 15), (15, 10), (10, 5)]
     targets = []
     for i in range(1000):
         targets.extend(tgts)
@@ -55,7 +69,15 @@ def get_targets_s2():
 
 
 def get_targets_s3():
-    tgts = [(10, 8), (10, 12)]
+    tgts = [(8, 10), (12, 10)]
+    targets = []
+    for i in range(1000):
+        targets.extend(tgts)
+    return targets
+
+
+def get_targets_t3():
+    tgts = [(8, 10), (10, 12), (12, 10), (10, 8)]
     targets = []
     for i in range(1000):
         targets.extend(tgts)

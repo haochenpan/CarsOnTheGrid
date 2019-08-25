@@ -14,9 +14,12 @@ if __name__ == '__main__':
     queries = [
         "E-RWP2-20-20-50-10-10-s0",
         "E-RWP2-20-20-50-10-10-s1",
+        "E-RWP2-20-20-50-10-10-t1",
         "E-RWP2-20-20-50-10-10-s2",
+        "E-RWP2-20-20-50-10-10-t2",
         "E-RWP2-20-20-50-10-10-s3",
-        "E-RWP2-20-20-50-10-10-s4",
+        "E-RWP2-20-20-50-10-10-t3",
+        # "E-RWP2-20-20-50-10-10-s4",
     ]
     for q in queries:
         print(q, r.scard(q))
@@ -25,6 +28,6 @@ if __name__ == '__main__':
             mem = eval(mem)
             mem_list.append(mem[0])
         print("avg", sum(mem_list) / len(mem_list))
-        print("stdev", statistics.stdev(mem_list))
-        print("median", statistics.median(mem_list))
+        # print("stdev", statistics.stdev(mem_list))
+        # print("median", statistics.median(mem_list))
         print()

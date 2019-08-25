@@ -671,6 +671,15 @@ if __name__ == '__main__':
         print(rd)
         r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s1",
                str((rd, RAND_SEED)))
+
+        SOURCE_COURSE = get_targets_t1()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rd = len(sim1.num_of_broadcasters) - 1
+        print(rd)
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t1",
+               str((rd, RAND_SEED)))
+
         #
         SOURCE_COURSE = get_targets_s2()
         sim1 = RWP2Simulation()
@@ -678,6 +687,14 @@ if __name__ == '__main__':
         rd = len(sim1.num_of_broadcasters) - 1
         print(rd)
         r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s2",
+               str((rd, RAND_SEED)))
+
+        SOURCE_COURSE = get_targets_t2()
+        sim1 = RWP2Simulation()
+        sim1.simulate()
+        rd = len(sim1.num_of_broadcasters) - 1
+        print(rd)
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t2",
                str((rd, RAND_SEED)))
 
         SOURCE_COURSE = get_targets_s3()
@@ -688,10 +705,18 @@ if __name__ == '__main__':
         r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s3",
                str((rd, RAND_SEED)))
 
-        SOURCE_COURSE = []
+        SOURCE_COURSE = get_targets_t3()
         sim1 = RWP2Simulation()
         sim1.simulate()
         rd = len(sim1.num_of_broadcasters) - 1
         print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s4",
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t3",
                str((rd, RAND_SEED)))
+
+        # SOURCE_COURSE = []
+        # sim1 = RWP2Simulation()
+        # sim1.simulate()
+        # rd = len(sim1.num_of_broadcasters) - 1
+        # print(rd)
+        # r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s4",
+        #        str((rd, RAND_SEED)))
