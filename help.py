@@ -9,7 +9,7 @@ from collections import defaultdict
 
 X_MAX = 20
 Y_MAX = 20
-NUM_OF_CARS = 50
+NUM_OF_CARS = 20
 NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100
 SOURCE_POS = (10, 10)
@@ -52,35 +52,10 @@ def get_targets_t1():
     return targets
 
 
-def get_targets_s2():
-    tgts = [(5, 10), (10, 15)]
-    targets = []
-    for i in range(1000):
-        targets.extend(tgts)
-    return targets
-
-
-def get_targets_t2():
-    tgts = [(5, 10), (10, 15), (15, 10), (10, 5)]
-    targets = []
-    for i in range(1000):
-        targets.extend(tgts)
-    return targets
-
-
-def get_targets_s3():
-    tgts = [(8, 10), (12, 10)]
-    targets = []
-    for i in range(1000):
-        targets.extend(tgts)
-    return targets
-
-
-def get_targets_t3():
-    tgts = [(8, 10), (10, 12), (12, 10), (10, 8)]
-    targets = []
-    for i in range(1000):
-        targets.extend(tgts)
+def get_targets_c1s():
+    targets = [(19, 10), (1, 10), (10, 10), (12, 12), (10, 14), (6, 10), (12, 4),
+               (18, 10), (10, 18), (2, 10), (12, 2),
+               (19, 10), (10, 19)]
     return targets
 
 
@@ -88,5 +63,3 @@ if __name__ == '__main__':
     pass
     # tgts = [(i, i), (i + 2, i + 4), (i + 3, i + 1)]
     # tgts = [(i, i), (i + 1, i + 3), (i + 4, i + 2)]
-
-    print(get_targets_s3())

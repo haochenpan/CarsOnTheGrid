@@ -278,6 +278,7 @@ class MG2Car(MG1Car):
             # append the previous target so that it won't
             # generate a new one
             if self.index == 0:
+                print("the source has reached the last target")
                 self.targets.append((px, py))
                 return
 
@@ -652,8 +653,20 @@ class GUI3:
 
 if __name__ == '__main__':
     MOB = "RWP2"
+    # RAND_SEED = "%.30f" % time.time()
+    # SOURCE_COURSE = get_targets_c1s()
+    # sim1 = RWP2Simulation()
+    # sim1.simulate()
+    # rd = len(sim1.num_of_broadcasters) - 1
+    # print(rd)
+    # print(sim1.cars[0].courses)
+    # gui = GUI(*sim1.summary())
+    # gui.draw()
+    # gui.show()
+    #
+    #
 
-    for i in range(200):
+    for i in range(500):
         print("round", i)
         RAND_SEED = "%.30f" % time.time()
         SOURCE_COURSE = [(10, 3600)]
@@ -664,59 +677,10 @@ if __name__ == '__main__':
         r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s0",
                str((rd, RAND_SEED)))
 
-        SOURCE_COURSE = get_targets_s1()
+        SOURCE_COURSE = get_targets_c1s()
         sim1 = RWP2Simulation()
         sim1.simulate()
         rd = len(sim1.num_of_broadcasters) - 1
         print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s1",
+        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-c1s",
                str((rd, RAND_SEED)))
-
-        SOURCE_COURSE = get_targets_t1()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t1",
-               str((rd, RAND_SEED)))
-
-        #
-        SOURCE_COURSE = get_targets_s2()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s2",
-               str((rd, RAND_SEED)))
-
-        SOURCE_COURSE = get_targets_t2()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t2",
-               str((rd, RAND_SEED)))
-
-        SOURCE_COURSE = get_targets_s3()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s3",
-               str((rd, RAND_SEED)))
-
-        SOURCE_COURSE = get_targets_t3()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-t3",
-               str((rd, RAND_SEED)))
-
-        # SOURCE_COURSE = []
-        # sim1 = RWP2Simulation()
-        # sim1.simulate()
-        # rd = len(sim1.num_of_broadcasters) - 1
-        # print(rd)
-        # r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s4",
-        #        str((rd, RAND_SEED)))
