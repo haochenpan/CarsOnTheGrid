@@ -1,20 +1,26 @@
-from help import *
+from random import Random
+import matplotlib.pyplot as plt
+import numpy as np
 from redis import Redis
+from help import *
 
 r = Redis(host='localhost', port=6379, db=0)
 
 
 class Car:
-    def __init__(self, index, seed, pos=None, targets=None):
+    def __init__(self, index, seed, source_pos, is_source=False, targets=None):
+
         assert 0 <= index
         self.index = index
         self.when = 0 if index == 0 else -1
-        self.rand = random.Random(f"{seed}+{self.index}")
-        if pos is None:
+        self.rand = Random(f"{seed}+{self.index}")
+        if is_source:
+            pos = source_pos
+        else:
             while True:
                 x_pos = self.rand.uniform(0, X_MAX)
                 y_pos = self.rand.uniform(0, Y_MAX)
-                if x_pos != SOURCE_POS[0] or y_pos != SOURCE_POS[1]:
+                if x_pos != source_pos[0] or y_pos != source_pos[1]:
                     pos = (x_pos, y_pos)
                     break
         self.courses = [pos]
@@ -169,16 +175,16 @@ class RDCar(SynCar):
 
 
 class MG1Car(Car):
-    def __init__(self, index, seed, pos=None, targets=None):
-        super().__init__(index, seed, pos, targets)
-        if pos is None:
+    def __init__(self, index, seed, source_pos, is_source=False, targets=None):
+        super().__init__(index, seed, source_pos, is_source, targets)
+        if is_source:
+            pos = source_pos
+        else:
             while True:
                 x_pos = self.rand.choice([i for i in range(0, X_MAX + 1)])
                 y_pos = self.rand.choice([i for i in range(0, Y_MAX + 1)])
-                if x_pos != SOURCE_POS[0] or y_pos != SOURCE_POS[1]:
+                if x_pos != source_pos[0] or y_pos != source_pos[1]:
                     pos = (x_pos, y_pos)
-                    assert x_pos == int(x_pos)
-                    assert y_pos == int(y_pos)
                     break
         self.courses = [pos]
         self.targets = [pos]
@@ -254,16 +260,16 @@ class MG1Car(Car):
 
 
 class MG2Car(MG1Car):
-    def __init__(self, index, seed, pos=None, targets=None):
-        super().__init__(index, seed, pos, targets)
-        if pos is None:
+    def __init__(self, index, seed, source_pos, is_source=False, targets=None):
+        super().__init__(index, seed, source_pos, is_source, targets)
+        if is_source:
+            pos = source_pos
+        else:
             while True:
                 x_pos = self.rand.choice([i for i in range(0, X_MAX)])
                 y_pos = self.rand.choice([i for i in range(0, Y_MAX)])
-                if x_pos != SOURCE_POS[0] or y_pos != SOURCE_POS[1]:
+                if x_pos != source_pos[0] or y_pos != source_pos[1]:
                     pos = (x_pos, y_pos)
-                    assert x_pos == int(x_pos)
-                    assert y_pos == int(y_pos)
                     break
         self.courses = [pos]
         self.targets = [pos]
@@ -278,7 +284,7 @@ class MG2Car(MG1Car):
             # append the previous target so that it won't
             # generate a new one
             if self.index == 0:
-                print("the source has reached the last target")
+                print("reached")
                 self.targets.append((px, py))
                 return
 
@@ -293,11 +299,7 @@ class MG2Car(MG1Car):
                 dir = dir[0]
             else:
                 last_x, last_y = self.courses[-2]
-                # print("self.index", self.index)
-                # print("self.courses", self.courses)
                 last_x, last_y = last_x % X_MAX, last_y % Y_MAX
-                # print("(last_x, last_y)", (last_x, last_y))
-                # print("dirs", dirs)
                 assert (last_x, last_y) in dirs
                 last_idx = dirs.index((last_x, last_y))
 
@@ -325,8 +327,6 @@ class MG2Car(MG1Car):
 
 class Simulation:
     def __init__(self):
-        # self.cars = [CAR_CLASS(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE)]
-        # self.cars.extend([CAR_CLASS(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
         self.cars = []
         self.num_of_broadcasters = []
         self.neighbor_percentage = []
@@ -398,19 +398,7 @@ class SynSimulation(Simulation):
         self.neighbor_percentage.append((sum(rates) / NUM_OF_CARS))
 
 
-class RWP1Simulation(SynSimulation):
-    def __init__(self):
-        super().__init__()
-        self.cars.append(RWP1Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
-        self.cars.extend([RWP1Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
-
-
-class RWP2Simulation(Simulation):
-    def __init__(self):
-        super().__init__()
-        self.cars.append(RWP2Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
-        self.cars.extend([RWP2Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
-
+class TorusSynSimulation(Simulation):
     def propagate(self, rd):
         broadcaster_pos_list = [car.get_pos() for car in self.cars if car.when >= 0]
         mod_pos_list = list(map(lambda p: (p[0] % X_MAX, p[1] % Y_MAX), broadcaster_pos_list))
@@ -438,28 +426,100 @@ class RWP2Simulation(Simulation):
         self.neighbor_percentage.append((sum(rates) / NUM_OF_CARS))
 
 
-class RDSimulation(SynSimulation):
-    def __init__(self):
+class RWP1Simulation(Simulation):
+    def __init__(self, seed, source_pos, source_source):
         super().__init__()
-        self.cars.append(RDCar(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
-        self.cars.extend([RDCar(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+        self.cars.append(RWP1Car(0, seed, source_pos, True, source_source))
+        self.cars.extend([RWP1Car(i, seed, source_pos) for i in range(1, NUM_OF_CARS)])
+
+
+class RWP2Simulation(TorusSynSimulation):
+    def __init__(self, seed, source_pos, source_source):
+        super().__init__()
+        self.cars.append(RWP2Car(0, seed, source_pos, True, source_source))
+        self.cars.extend([RWP2Car(i, seed, source_pos) for i in range(1, NUM_OF_CARS)])
+
+
+class RDSimulation(SynSimulation):
+    def __init__(self, seed, source_pos, source_source):
+        super().__init__()
+        self.cars.append(RDCar(0, seed, source_pos, True, source_source))
+        self.cars.extend([RDCar(i, seed, source_pos) for i in range(1, NUM_OF_CARS)])
 
 
 class MG1Simulation(SynSimulation):
-    def __init__(self):
+    def __init__(self, seed, source_pos, source_source):
         super().__init__()
-        self.cars.append(MG1Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
-        self.cars.extend([MG1Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+        self.cars.append(MG1Car(0, seed, source_pos, True, source_source))
+        self.cars.extend([MG1Car(i, seed, source_pos) for i in range(1, NUM_OF_CARS)])
 
 
-class MG2Simulation(SynSimulation):
-    def __init__(self):
+class MG2Simulation(TorusSynSimulation):
+    def __init__(self, seed, source_pos, source_source):
         super().__init__()
-        self.cars.append(MG2Car(0, RAND_SEED, SOURCE_POS, SOURCE_COURSE))
-        self.cars.extend([MG2Car(i, RAND_SEED) for i in range(1, NUM_OF_CARS)])
+        self.cars.append(MG2Car(0, seed, source_pos, True, source_source))
+        self.cars.extend([MG2Car(i, seed, source_pos) for i in range(1, NUM_OF_CARS)])
 
 
 class GUI:
+    def show(self):
+        plt.show()
+        plt.clf()
+        plt.close()
+
+    def save(self, name):
+        plt.tight_layout()
+        plt.savefig(f"{name}.png")
+        plt.clf()
+        plt.close()
+
+
+class GUIHeatMap(GUI):
+    def __init__(self, sim: Simulation):
+        self.sim = sim
+        self.fig = plt.figure(figsize=(18, 9))
+        self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])
+        self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
+        self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
+        self.ax3 = self.fig.add_subplot(122)
+
+    def draw(self):
+        # draw all final positions:
+        for car in self.sim.cars:
+            fx, fy = car.courses[-1]
+            self.ax1.plot(fx, fy, "go", markersize=2)
+
+        source_courses = self.sim.cars[0].courses
+        xys = list(zip(*source_courses))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.ax1.plot(xs, ys, "bo", markersize=2)
+
+        source_targets = self.sim.cars[0].targets
+        xys = list(zip(*source_targets))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.ax1.plot(xs, ys, "ro", markersize=4)
+
+        self.ax1.set_xlabel("x axis")
+        self.ax1.set_ylabel("y axis")
+        self.ax1.set_title("source's position")
+        self.ax1.grid(True)
+
+        self.ax3.set_title("courses heat map")
+        hot_map = [[0 for _ in range(X_MAX)] for _ in range(Y_MAX)]
+        for car in self.sim.cars[1:]:
+            for target in car.courses:
+                int_target_x = int(target[0]) % X_MAX
+                int_target_y = int(target[1]) % Y_MAX
+                hot_map[int_target_y][int_target_x] += 1
+        hot_map = list(reversed(hot_map))
+        im = self.ax3.imshow(hot_map)
+        cbar = self.fig.colorbar(im, ax=self.ax3)
+        # cbar.ax.set_ylabel("trace hot map", rotation=-90, va="bottom")
+
+
+class GUI1(GUI):
     def __init__(self, courses, targets, num_of_broadcasters, neighbor_percentage):
         self.courses = courses
         self.targets = targets
@@ -502,7 +562,6 @@ class GUI:
         self.ax1.plot(xs, ys, "bo", markersize=2)
 
         source_targets = self.targets[0]
-        print(source_targets)
         xys = list(zip(*source_targets))
         xs = list(map(lambda x: x % X_MAX, list(xys[0])))
         ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
@@ -536,33 +595,18 @@ class GUI:
                 int_target_x = int(target[0]) % X_MAX
                 int_target_y = int(target[1]) % Y_MAX
                 hot_map[int_target_y][int_target_x] += 1
-        # for row in hot_map:
-        #     print(row)
-        #
-        print("len(self.courses)", len(self.courses))
-        print("len(self.num_of_broadcasters) -1 =", len(self.num_of_broadcasters) - 1)
-        im = self.ax4.imshow(hot_map)
+
         # for i in range(Y_MAX):
         #     for j in range(X_MAX):
         #         text = self.ax4.text(j, i, hot_map[i][j], ha="center", va="center", color="w")
         self.ax4.set_title("trace hot map")
 
+        im = self.ax4.imshow(hot_map)
         cbar = self.fig.colorbar(im, ax=self.ax4)
         cbar.ax.set_ylabel("trace hot map", rotation=-90, va="bottom")
 
-    def show(self):
-        plt.show()
-        plt.clf()
-        plt.close()
 
-    def save(self, name):
-        plt.tight_layout()
-        plt.savefig(f"{name}.png")
-        plt.clf()
-        plt.close()
-
-
-class GUI2:
+class GUI2(GUI):
     def __init__(self, sim: Simulation):
         self.sim = sim
         self.fig = plt.figure(figsize=(9 * 3, 9 * 2))
@@ -592,19 +636,8 @@ class GUI2:
             self.axs[i].plot(xs, ys, "bo", markersize=2)
             self.axs[i].grid(True)
 
-    def show(self):
-        plt.show()
-        plt.clf()
-        plt.close()
 
-    def save(self, name):
-        plt.tight_layout()
-        plt.savefig(f"{name}.png")
-        plt.clf()
-        plt.close()
-
-
-class GUI3:
+class GUI3(GUI):
     def __init__(self, names, records):
         assert len(names) == len(records)
         self.names = names
@@ -635,52 +668,11 @@ class GUI3:
             x_bars = [0 for i in y_pos]
             for record in self.records[i]:
                 x_bars[(record - self.lo)] += 1
-            print(x_bars)
             self.axs[i].bar(y_pos, x_bars)
             self.axs[i].set_title(self.names[i])
 
-    def show(self):
-        plt.show()
-        plt.clf()
-        plt.close()
-
-    def save(self, name):
-        plt.tight_layout()
-        plt.savefig(f"{name}.png")
-        plt.clf()
-        plt.close()
-
 
 if __name__ == '__main__':
-    MOB = "RWP2"
-    # RAND_SEED = "%.30f" % time.time()
-    # SOURCE_COURSE = get_targets_c1s()
-    # sim1 = RWP2Simulation()
-    # sim1.simulate()
-    # rd = len(sim1.num_of_broadcasters) - 1
-    # print(rd)
-    # print(sim1.cars[0].courses)
-    # gui = GUI(*sim1.summary())
-    # gui.draw()
-    # gui.show()
-    #
-    #
-
-    for i in range(500):
-        print("round", i)
-        RAND_SEED = "%.30f" % time.time()
-        SOURCE_COURSE = [(10, 3600)]
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s0",
-               str((rd, RAND_SEED)))
-
-        SOURCE_COURSE = get_targets_c1s()
-        sim1 = RWP2Simulation()
-        sim1.simulate()
-        rd = len(sim1.num_of_broadcasters) - 1
-        print(rd)
-        r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-c1s",
-               str((rd, RAND_SEED)))
+    pass
+    #     r.sadd(f"E-{MOB}-{X_MAX}-{Y_MAX}-{NUM_OF_CARS}-{SOURCE_POS[0]}-{SOURCE_POS[1]}-s0",
+    #            str((rd, RAND_SEED)))
