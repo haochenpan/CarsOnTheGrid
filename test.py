@@ -59,6 +59,7 @@ class Car:
 
 class SynCar(Car):
     def move(self):
+
         step = 1
         while step > 0:
             # if source and see a repeated target
@@ -92,7 +93,6 @@ class SynCar(Car):
 class RWP1Car(SynCar):
     def set_target(self):
         if self.target_idx == len(self.targets):
-
             px, py = self.get_prev_target()
 
             # if source and reached the last target,
@@ -342,6 +342,7 @@ class Simulation:
         for car in self.cars:
             if car.when >= 0:
                 num += 1
+        print(num)
         self.num_of_broadcasters.append(num)
 
     def calculate_neighbor_percentage(self):
@@ -474,20 +475,26 @@ class GUI:
         plt.close()
 
 
-class GUIHeatMap(GUI):
+class GUI1(GUI):
     def __init__(self, sim: Simulation):
         self.sim = sim
         self.fig = plt.figure(figsize=(18, 9))
         self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])
         self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
         self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
-        self.ax3 = self.fig.add_subplot(122)
 
     def draw(self):
         # draw all final positions:
         for car in self.sim.cars:
             fx, fy = car.courses[-1]
             self.ax1.plot(fx, fy, "go", markersize=2)
+
+        # for RD, to validate target positions
+        # for car_targets in self.targets:
+        #     xys = list(zip(*car_targets))
+        #     xs = list(map(lambda x: x, list(xys[0])))
+        #     ys = list(map(lambda y: y, list(xys[1])))
+        #     self.ax1.plot(xs, ys, "ro", markersize=2)
 
         source_courses = self.sim.cars[0].courses
         xys = list(zip(*source_courses))
@@ -506,7 +513,14 @@ class GUIHeatMap(GUI):
         self.ax1.set_title("source's position")
         self.ax1.grid(True)
 
-        self.ax3.set_title("courses heat map")
+
+class GUIHeatMap(GUI1):
+    def __init__(self, sim: Simulation):
+        super().__init__(sim)
+        self.ax3 = self.fig.add_subplot(122)
+
+    def draw(self):
+        super().draw()
         hot_map = [[0 for _ in range(X_MAX)] for _ in range(Y_MAX)]
         for car in self.sim.cars[1:]:
             for target in car.courses:
@@ -516,125 +530,82 @@ class GUIHeatMap(GUI):
         hot_map = list(reversed(hot_map))
         im = self.ax3.imshow(hot_map)
         cbar = self.fig.colorbar(im, ax=self.ax3)
-        # cbar.ax.set_ylabel("trace hot map", rotation=-90, va="bottom")
+        self.ax3.set_title("courses heat map")
 
 
-class GUI1(GUI):
-    def __init__(self, courses, targets, num_of_broadcasters, neighbor_percentage):
-        self.courses = courses
-        self.targets = targets
-        self.num_of_broadcasters = num_of_broadcasters
-        self.neighbor_percentage = neighbor_percentage
-
-        self.fig = plt.figure(figsize=(18, 9))
-        # self.fig = plt.figure(figsize=(18 * 5, 9 * 5))   # for ax4's text
-        # self.fig = plt.figure(figsize=(27, 9))  ###
-
-        self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])  ###
-        self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
-        self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
-
-        # self.ax2 = self.fig.add_subplot(132, xlim=[0, NUM_OF_MOVES], ylim=[0, 0.002])  ###
-
-        # x_max = NUM_OF_MOVES if len(self.num_of_broadcasters) <= NUM_OF_MOVES else len(self.num_of_broadcasters)
-        # self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])  ###
-
-        self.ax4 = self.fig.add_subplot(122)
+class GUINumBro(GUI1):
+    def __init__(self, sim: Simulation):
+        super().__init__(sim)
+        x_max = NUM_OF_MOVES if len(self.sim.num_of_broadcasters) <= NUM_OF_MOVES else len(self.sim.num_of_broadcasters)
+        self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])  ###
 
     def draw(self):
+        super().draw()
+        xs = [i for i in range(len(self.sim.num_of_broadcasters))]
+        self.ax3.plot(xs, self.sim.num_of_broadcasters, marker='o', markersize=3)
 
-        # print all cars' init pos
-        for course in self.courses:
-            first_x, first_y = course[0]
-            self.ax1.plot(first_x, first_y, "go", markersize=2)
-
-        # for RD, to validate target positions
-        # for car_targets in self.targets:
-        #     xys = list(zip(*car_targets))
-        #     xs = list(map(lambda x: x, list(xys[0])))
-        #     ys = list(map(lambda y: y, list(xys[1])))
-        #     self.ax1.plot(xs, ys, "ro", markersize=2)
-
-        source_courses = self.courses[0]
-        xys = list(zip(*source_courses))
-        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
-        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
-        self.ax1.plot(xs, ys, "bo", markersize=2)
-
-        source_targets = self.targets[0]
-        xys = list(zip(*source_targets))
-        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
-        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
-        self.ax1.plot(xs, ys, "ro", markersize=4)
-
-        self.ax1.set_xlabel("x axis")
-        self.ax1.set_ylabel("y axis")
-        self.ax1.set_title("source's position")
-        self.ax1.grid(True)
-
-        # average MN neighbor percentage
-        # xs = [i for i in range(len(self.neighbor_percentage))]
-        # self.ax2.plot(xs, self.neighbor_percentage, marker='o')
-        # self.ax2.grid(True)
-
-        # round vs # of broadcasters
-        # xs = [i for i in range(len(self.num_of_broadcasters))]
-        # self.ax3.plot(xs, self.num_of_broadcasters, marker='o', markersize=3)
-        #
-        # self.ax3.set_xlabel("simulation round")
-        # self.ax3.set_ylabel("# of msg received cars")
-        # self.ax3.set_title("# of msg received cars vs. simulation round \n")
-        # self.ax3.grid(True)
-
-        # hot map
-        hot_map = [[0 for _ in range(X_MAX)] for _ in range(Y_MAX)]
-        for i, car_targets in enumerate(self.courses):
-            if i == 0:
-                continue
-            for j, target in enumerate(car_targets):
-                int_target_x = int(target[0]) % X_MAX
-                int_target_y = int(target[1]) % Y_MAX
-                hot_map[int_target_y][int_target_x] += 1
-
-        # for i in range(Y_MAX):
-        #     for j in range(X_MAX):
-        #         text = self.ax4.text(j, i, hot_map[i][j], ha="center", va="center", color="w")
-        self.ax4.set_title("trace hot map")
-
-        im = self.ax4.imshow(hot_map)
-        cbar = self.fig.colorbar(im, ax=self.ax4)
-        cbar.ax.set_ylabel("trace hot map", rotation=-90, va="bottom")
+        self.ax3.set_xlabel("simulation round")
+        self.ax3.set_ylabel("# of msg received cars")
+        self.ax3.set_title("# of msg received cars vs. simulation round \n")
+        self.ax3.grid(True)
 
 
-class GUI2(GUI):
+class GUINumNei(GUI1):
     def __init__(self, sim: Simulation):
+        super().__init__(sim)
+        self.ax2 = self.fig.add_subplot(132, xlim=[0, NUM_OF_MOVES], ylim=[0, 0.002])  ###
+
+    def draw(self):
+        super().draw()
+
+        xs = [i for i in range(len(self.sim.neighbor_percentage))]
+        self.ax2.plot(xs, self.sim.neighbor_percentage, marker='o')
+        self.ax2.grid(True)
+
+
+class GUISnapshot(GUI):
+    def __init__(self, sim: Simulation, count=6, interval=10):
+        assert count in [6, 12]
+        assert interval > 0
         self.sim = sim
-        self.fig = plt.figure(figsize=(9 * 3, 9 * 2))
         self.axs = []
-        for i in range(6):
-            axi = self.fig.add_subplot(int(f"23{i + 1}"), xlim=[0, X_MAX], ylim=[0, Y_MAX])
+        self.interval = interval
+        if count == 6:
+            self.fig = plt.figure(figsize=(9 * 3, 9 * 2))
+            for i in range(6):
+                axi = self.fig.add_subplot(2, 3, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
+                self.axs.append(axi)
+        else:
+            self.fig = plt.figure(figsize=(9 * 4, 9 * 3))
+            for i in range(12):
+                axi = self.fig.add_subplot(3, 4, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
+                self.axs.append(axi)
+        for axi in self.axs:
             axi.set_xticks(np.arange(0, X_MAX + 1, 5))
             axi.set_yticks(np.arange(0, Y_MAX + 1, 5))
-            self.axs.append(axi)
 
     def draw(self):
-        incr = 40
-        for i in range(6):
-            for car in self.sim.cars:
-                x, y = car.courses[i * incr]
-                x = x % X_MAX
-                y = y % Y_MAX
-                if car.when <= i * incr + 1:
-                    self.axs[i].plot(x, y, "go", markersize=4)
-                else:
-                    self.axs[i].plot(x, y, "ro", markersize=4)
-
-            source_courses = self.sim.cars[0].courses[:i * incr + 1]
+        for i, axi in enumerate(self.axs):
+            source_courses = self.sim.cars[0].courses[:i * self.interval + 1]
             xys = list(zip(*source_courses))
             xs = list(map(lambda x: x % X_MAX, list(xys[0])))
             ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
             self.axs[i].plot(xs, ys, "bo", markersize=2)
             self.axs[i].grid(True)
+
+            target_length = i * self.interval
+            for car in self.sim.cars:
+                acc_length = 0
+                for j, pos in enumerate(car.courses[1:]):
+                    acc_length += get_dist(*pos, *car.courses[j])
+                    if acc_length >= target_length:
+                        x = pos[0] % X_MAX
+                        y = pos[1] % Y_MAX
+                        if car.when <= i * self.interval:
+                            self.axs[i].plot(x, y, "go", markersize=4)
+                        else:
+                            self.axs[i].plot(x, y, "ro", markersize=4)
+                        break
 
 
 class GUI3(GUI):
