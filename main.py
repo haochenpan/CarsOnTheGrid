@@ -1,3 +1,4 @@
+from time import time
 from base import *
 
 
@@ -155,11 +156,9 @@ class MG2Car(SynMGCar):
 
             px, py = self.get_prev_target()
 
-            # if source and reached the last target,
-            # append the previous target so that it won't
-            # generate a new one
+            # if the source has reached the last target,
+            # append the previous target so that it won't generate a new one
             if self.index == 0:
-                print("reached")
                 self.targets.append((px, py))
                 return
 
@@ -236,8 +235,12 @@ class MG2Simulation(TorSynSimulation):
 
 
 if __name__ == '__main__':
-    sim = MG1Simulation("aaa", (0, 0), None)
-    sim.simulate()
-    gui = GUIHeatMap(sim)
-    gui.draw()
-    gui.show()
+    pass
+    # typ = "RWP2"
+    # RAND_SEED = "%.30f" % time()
+    # SOURCE_POS = (50, 50)
+    # sim = RWP2Simulation(RAND_SEED, SOURCE_POS, None)
+    # sim.simulate()
+    # gui = GUIHeatMap(sim, True, True)
+    # gui.draw()
+    # gui.save(f"fig/3/{typ}_x{X_MAX}_y{Y_MAX}_c{NUM_OF_CARS}")

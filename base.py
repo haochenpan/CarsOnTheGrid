@@ -125,7 +125,6 @@ class Simulation:
         for car in self.cars:
             if car.when >= 0:
                 num += 1
-        print(num)
         self.num_of_broadcasters.append(num)
 
     def calculate_neighbor_percentage(self):
@@ -224,12 +223,17 @@ class GUI:
 
 
 class GUIFinalPos(GUI):
-    def __init__(self, sim: Simulation):
+    def __init__(self, sim: Simulation, mod, solo):
         self.sim = sim
-        self.fig = plt.figure(figsize=(18, 9))
-        self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])
-        self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
-        self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
+        self.mod = mod
+        self.solo = solo
+        if solo:
+            self.fig = plt.figure(figsize=(9, 9))
+        else:
+            self.fig = plt.figure(figsize=(18, 9))
+            self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])
+            self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
+            self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
 
     def draw(self):
         # draw all final positions:
@@ -242,9 +246,9 @@ class GUIFinalPos(GUI):
         #     self.ax1.plot(*unzip(car.targets[1:], False), "ro", markersize=2)
 
         source_courses = self.sim.cars[0].courses
-        self.ax1.plot(*unzip(source_courses, False), "bo", markersize=2)
+        self.ax1.plot(*unzip(source_courses, self.mod), "bo", markersize=2)
         source_targets = self.sim.cars[0].targets
-        self.ax1.plot(*unzip(source_targets, False), "ro", markersize=4)
+        self.ax1.plot(*unzip(source_targets, self.mod), "ro", markersize=4)
 
         self.ax1.set_xlabel("x axis")
         self.ax1.set_ylabel("y axis")
@@ -253,33 +257,49 @@ class GUIFinalPos(GUI):
 
 
 class GUIHeatMap(GUIFinalPos):
-    def __init__(self, sim: Simulation):
-        super().__init__(sim)
-        self.ax3 = self.fig.add_subplot(122)
+    def __init__(self, sim: Simulation, mod, solo):
+        super().__init__(sim, mod, solo)
+        if not solo:
+            self.ax3 = self.fig.add_subplot(122)
+        else:
+            self.ax3 = self.fig.add_subplot(111)
+        self.ax3.set_xticks(np.arange(0, X_MAX + 1, 5))
+        self.ax3.set_yticks(np.arange(0, Y_MAX + 1, 5))
 
     def draw(self):
-        super().draw()
-        hot_map = [[0 for _ in range(X_MAX)] for _ in range(Y_MAX)]
+        if not self.solo:
+            super().draw()
+
+        hot_map = [[0 for _ in range(X_MAX + 1)] for _ in range(Y_MAX + 1)]
         for car in self.sim.cars[1:]:
             for target in car.courses:
-                int_target_x = int(target[0]) % X_MAX
-                int_target_y = int(target[1]) % Y_MAX
+                if self.mod:
+                    int_target_x = int(target[0]) % X_MAX
+                    int_target_y = int(target[1]) % Y_MAX
+                else:
+                    int_target_x = int(target[0])
+                    int_target_y = int(target[1])
                 hot_map[int_target_y][int_target_x] += 1
-        hot_map = list(reversed(hot_map))
+        # hot_map = list(reversed(hot_map))
         im = self.ax3.imshow(hot_map)
         cbar = self.fig.colorbar(im, ax=self.ax3)
-        cbar.ax.set_ylabel("freequency", rotation=-90, va="bottom")
-        self.ax3.set_title("all cars' courses")
+        cbar.ax.set_ylabel("frequencies", rotation=-90, va="bottom", fontsize=20)
+        self.ax3.set_title("the heat map of all cars' paths", fontsize=20)
 
 
 class GUINumBro(GUIFinalPos):
-    def __init__(self, sim: Simulation):
-        super().__init__(sim)
+    def __init__(self, sim: Simulation, mod, solo):
+        super().__init__(sim, mod, solo)
         x_max = NUM_OF_MOVES if len(self.sim.num_of_broadcasters) <= NUM_OF_MOVES else len(self.sim.num_of_broadcasters)
-        self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])  ###
+        if not solo:
+            self.ax3 = self.fig.add_subplot(122, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])
+        else:
+            self.ax3 = self.fig.add_subplot(111, xlim=[x_max - 500, x_max], ylim=[0, NUM_OF_CARS])
 
     def draw(self):
-        super().draw()
+        if not self.solo:
+            super().draw()
+
         xs = [i for i in range(len(self.sim.num_of_broadcasters))]
         self.ax3.plot(xs, self.sim.num_of_broadcasters, marker='o', markersize=3)
 
@@ -290,12 +310,16 @@ class GUINumBro(GUIFinalPos):
 
 
 class GUINumNei(GUIFinalPos):
-    def __init__(self, sim: Simulation):
-        super().__init__(sim)
-        self.ax2 = self.fig.add_subplot(122, xlim=[0, NUM_OF_MOVES], ylim=[0, 0.002])  ###
+    def __init__(self, sim: Simulation, mod, solo):
+        super().__init__(sim, mod, solo)
+        if not solo:
+            self.ax2 = self.fig.add_subplot(122, xlim=[0, NUM_OF_MOVES], ylim=[0, 0.002])
+        else:
+            self.ax2 = self.fig.add_subplot(111, xlim=[0, NUM_OF_MOVES], ylim=[0, 0.002])
 
     def draw(self):
-        super().draw()
+        if not self.solo:
+            super().draw()
 
         xs = [i for i in range(len(self.sim.neighbor_percentage))]
         self.ax2.plot(xs, self.sim.neighbor_percentage, marker='o')
