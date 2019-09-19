@@ -1,4 +1,3 @@
-from test import *
 from redis import Redis
 import statistics
 
@@ -12,8 +11,11 @@ r = Redis(host='localhost', port=6379, db=0)
 
 if __name__ == '__main__':
     queries = [
-        "E-RWP2-20-20-20-10-10-s0",
-        "E-RWP2-20-20-20-10-10-c1s",
+        "E-RWP1-x50-y50-c50-sx0-sy0-ctr",
+        "E-RWP2-x50-y50-c50-sx0-sy0-ctr",
+        "E-RD-x50-y50-c50-sx0-sy0-ctr",
+        "E-MG1-x50-y50-c50-sx0-sy0-ctr",
+        "E-MG2-x50-y50-c50-sx0-sy0-ctr",
     ]
     for q in queries:
         print(q, r.scard(q))
@@ -22,6 +24,6 @@ if __name__ == '__main__':
             mem = eval(mem)
             mem_list.append(mem[0])
         print("avg", sum(mem_list) / len(mem_list))
-        # print("stdev", statistics.stdev(mem_list))
-        # print("median", statistics.median(mem_list))
+        print("stdev", statistics.stdev(mem_list))
+        print("median", statistics.median(mem_list))
         print()

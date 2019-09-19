@@ -228,9 +228,9 @@ class GUIFinalPos(GUI):
         self.mod = mod
         self.solo = solo
         if solo:
-            self.fig = plt.figure(figsize=(9, 9))
+            self.fig = plt.figure(figsize=fig_size)
         else:
-            self.fig = plt.figure(figsize=(18, 9))
+            self.fig = plt.figure(figsize=(fig_size[0] * 2, fig_size[1]))
             self.ax1 = self.fig.add_subplot(121, xlim=[0, X_MAX], ylim=[0, Y_MAX])
             self.ax1.set_xticks(np.arange(0, X_MAX + 1, 5))
             self.ax1.set_yticks(np.arange(0, Y_MAX + 1, 5))
@@ -239,7 +239,10 @@ class GUIFinalPos(GUI):
         # draw all final positions:
         for car in self.sim.cars:
             fx, fy = car.courses[-1]
-            self.ax1.plot(fx, fy, "go", markersize=2)
+            if self.mod:
+                self.ax1.plot(fx % X_MAX, fy % X_MAX, "go", markersize=2)
+            else:
+                self.ax1.plot(fx, fy, "go", markersize=2)
 
         # for RD, to validate target positions
         # for car in self.sim.cars:
@@ -334,12 +337,12 @@ class GUISnapshot(GUI):
         self.axs = []
         self.interval = interval
         if count == 6:
-            self.fig = plt.figure(figsize=(9 * 4, 9 * 2))
+            self.fig = plt.figure(figsize=(fig_size[0] * 4, fig_size[1] * 2))
             for i in range(6):
                 axi = self.fig.add_subplot(2, 3, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
                 self.axs.append(axi)
         else:
-            self.fig = plt.figure(figsize=(9 * 3, 9 * 4))
+            self.fig = plt.figure(figsize=(fig_size[0] * 3, fig_size[1] * 4))
             for i in range(12):
                 axi = self.fig.add_subplot(4, 3, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
                 self.axs.append(axi)
