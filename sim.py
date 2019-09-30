@@ -5,47 +5,69 @@ r = Redis(host='localhost', port=6379, db=0)
 
 if __name__ == '__main__':
     SOURCE_POS = (0, 0)
-    for i in range(600):
+    for i in range(1):
         RAND_SEED = "%.30f" % time()
         print(i, RAND_SEED)
+        MOB = "RWP2"
 
-        MOB = "RWP1"
-        sim = RWP1Simulation(RAND_SEED, SOURCE_POS, RWP1_diagonal())
+        sim = RWP2Simulation(RAND_SEED, SOURCE_POS, None)
         sim.simulate()
         rd = len(sim.num_of_broadcasters) - 1
-        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-diag",
+        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-up",
                str((rd, RAND_SEED)))
         print(rd)
+        gui = GUINumBro(sim, True, False)
+        gui.draw()
+        gui.save("ctr")
 
-        MOB = "RWP2"
+        sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_up())
+        sim.simulate()
+        rd = len(sim.num_of_broadcasters) - 1
+        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-up",
+               str((rd, RAND_SEED)))
+        print(rd)
+        gui = GUINumBro(sim, True, False)
+        gui.draw()
+        gui.save("up")
+
+
+        sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_right())
+        sim.simulate()
+        rd = len(sim.num_of_broadcasters) - 1
+        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-up",
+               str((rd, RAND_SEED)))
+        print(rd)
+        gui = GUINumBro(sim, True, False)
+        gui.draw()
+        gui.save("right")
+
+        sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_zigzag_14())
+        sim.simulate()
+        rd = len(sim.num_of_broadcasters) - 1
+        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-up",
+               str((rd, RAND_SEED)))
+        print(rd)
+        gui = GUINumBro(sim, True, False)
+        gui.draw()
+        gui.save("14")
+
+        sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_zigzag_23())
+        sim.simulate()
+        rd = len(sim.num_of_broadcasters) - 1
+        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-up",
+               str((rd, RAND_SEED)))
+        print(rd)
+        gui = GUINumBro(sim, True, False)
+        gui.draw()
+        gui.save("23")
+
         sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_diagonal())
         sim.simulate()
         rd = len(sim.num_of_broadcasters) - 1
-        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-diag",
+        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-up",
                str((rd, RAND_SEED)))
         print(rd)
+        gui = GUINumBro(sim, True, False)
+        gui.draw()
+        gui.save("diag")
 
-        MOB = "RD"
-        sim = RDSimulation(RAND_SEED, SOURCE_POS, RD_diagonal())
-        sim.simulate()
-        rd = len(sim.num_of_broadcasters) - 1
-        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-diag",
-               str((rd, RAND_SEED)))
-        print(rd)
-
-        MOB = "MG1"
-        sim = MG1Simulation(RAND_SEED, SOURCE_POS, MG1_diagonal())
-        sim.simulate()
-        rd = len(sim.num_of_broadcasters) - 1
-        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-diag",
-               str((rd, RAND_SEED)))
-        print(rd)
-
-        MOB = "MG2"
-        sim = MG2Simulation(RAND_SEED, SOURCE_POS, MG2_diagonal())
-        sim.simulate()
-        rd = len(sim.num_of_broadcasters) - 1
-        r.sadd(f"E-{MOB}-x{X_MAX}-y{Y_MAX}-c{NUM_OF_CARS}-sx{SOURCE_POS[0]}-sy{SOURCE_POS[1]}-diag",
-               str((rd, RAND_SEED)))
-        print(rd)
-        print()

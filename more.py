@@ -11,19 +11,23 @@ r = Redis(host='localhost', port=6379, db=0)
 
 if __name__ == '__main__':
     queries = [
-        "E-RWP1-x50-y50-c50-sx0-sy0-ctr",
-        "E-RWP2-x50-y50-c50-sx0-sy0-ctr",
-        "E-RD-x50-y50-c50-sx0-sy0-ctr",
-        "E-MG1-x50-y50-c50-sx0-sy0-ctr",
-        "E-MG2-x50-y50-c50-sx0-sy0-ctr",
+        "E-RWP2-x50-y50-c25-sx0-sy0-ctr",
+        "E-RWP2-x50-y50-c25-sx0-sy0-up",
+        "E-RWP2-x50-y50-c25-sx0-sy0-right",
+        "E-RWP2-x50-y50-c25-sx0-sy0-14",
+        "E-RWP2-x50-y50-c25-sx0-sy0-23",
+        "E-RWP2-x50-y50-c25-sx0-sy0-diag",
+
     ]
+    results = []
     for q in queries:
         print(q, r.scard(q))
         mem_list = []
         for mem in r.smembers(q):
             mem = eval(mem)
             mem_list.append(mem[0])
-        print("avg", sum(mem_list) / len(mem_list))
-        print("stdev", statistics.stdev(mem_list))
-        print("median", statistics.median(mem_list))
-        print()
+        print("avg", round(sum(mem_list) / len(mem_list), 2))
+        results.append(round(sum(mem_list) / len(mem_list), 2))
+        # print("stdev", statistics.stdev(mem_list))
+        # print("median", statistics.median(mem_list))
+    print(*results, sep="\n")
