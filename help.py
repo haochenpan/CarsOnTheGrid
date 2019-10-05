@@ -2,6 +2,7 @@ import math
 
 X_MAX = 50
 Y_MAX = X_MAX
+NUM_OF_SRCS = 2
 NUM_OF_CARS = 25
 NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100

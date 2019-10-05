@@ -8,17 +8,16 @@ class Car:
     def __init__(self, index, seed, source_pos, targets=None):
         assert 0 <= index
         self.index = index
-        self.when = 0 if index == 0 else -1
+        self.when = 0 if index < NUM_OF_SRCS else -1
         self.rand = Random(f"{seed}+{self.index}")
-        if self.index == 0:
+        if self.index < NUM_OF_SRCS:
+            pos = source_pos
+        elif source_pos is not None:
             pos = source_pos
         else:
-            while True:
-                x_pos = self.rand.uniform(0, X_MAX)  # !
-                y_pos = self.rand.uniform(0, Y_MAX)
-                if x_pos != source_pos[0] or y_pos != source_pos[1]:
-                    pos = (x_pos, y_pos)
-                    break
+            x_pos = self.rand.uniform(0, X_MAX)
+            y_pos = self.rand.uniform(0, Y_MAX)
+            pos = (x_pos, y_pos)
         self.courses = [pos]
         self.targets = [pos]
         if targets is not None: self.targets.extend(targets)
@@ -108,56 +107,6 @@ class SynMGCar(Car):
         self.courses.append((tx, ty))
 
 
-class Simulation:
-    def __init__(self):
-        self.cars = []
-        self.num_of_broadcasters = []
-        self.neighbor_percentage = []
-
-    def cars_move(self):
-        [car.move() for car in self.cars]
-
-    def propagate(self, rd):
-        assert False, "not implemented"
-
-    def calculate_num_of_broadcasters(self):
-        num = 0
-        for car in self.cars:
-            if car.when >= 0:
-                num += 1
-        self.num_of_broadcasters.append(num)
-
-    def calculate_neighbor_percentage(self):
-        assert False, "not implemented"
-
-    def simulate(self):
-        for _ in range(PRE_RUN_COUNT):
-            for car in self.cars[1:]:
-                car.move()
-        for car in self.cars[1:]:
-            car.truncate()
-        self.calculate_num_of_broadcasters()
-        # self.calculate_neighbor_percentage()  ###
-
-        rd = 1
-        while self.num_of_broadcasters[-1] != NUM_OF_CARS:
-            self.cars_move()
-            self.propagate(rd)
-            self.calculate_num_of_broadcasters()
-            # self.calculate_neighbor_percentage()  ###
-            if not EXCEED_MOVES and rd == NUM_OF_MOVES:
-                break
-            rd += 1
-
-    def summary(self):
-        courses = []
-        targets = []
-        for car in self.cars:
-            courses.append(car.courses)
-            targets.append(car.targets)
-        return courses, targets, self.num_of_broadcasters, self.neighbor_percentage
-
-
 class RWP1Car(SynCar):
     def set_target(self):
         if self.target_idx == len(self.targets):
@@ -181,12 +130,6 @@ class RWP2Car(SynCar):
     def set_target(self):
         if self.target_idx == len(self.targets):
             px, py = self.get_prev_target()
-
-            # if the source has reached the last target,
-            # append the previous target so that it won't generate a new one
-            if self.index == 0:
-                self.targets.append((px, py))
-                return
 
             cx, cy = self.get_pos()
             x_max = cx + 0.5 * X_MAX
@@ -355,6 +298,56 @@ class MG2Car(SynMGCar):
             self.targets.append(dir)
 
 
+class Simulation:
+    def __init__(self):
+        self.cars = []
+        self.num_of_broadcasters = []
+        self.neighbor_percentage = []
+
+    def cars_move(self):
+        [car.move() for car in self.cars]
+
+    def propagate(self, rd):
+        assert False, "not implemented"
+
+    def calculate_num_of_broadcasters(self):
+        num = 0
+        for car in self.cars:
+            if car.when >= 0:
+                num += 1
+        self.num_of_broadcasters.append(num)
+
+    def calculate_neighbor_percentage(self):
+        assert False, "not implemented"
+
+    def simulate(self):
+        for _ in range(PRE_RUN_COUNT):
+            for car in self.cars[NUM_OF_SRCS:]:
+                car.move()
+        for car in self.cars[NUM_OF_SRCS:]:
+            car.truncate()
+        self.calculate_num_of_broadcasters()
+        # self.calculate_neighbor_percentage()  ###
+
+        rd = 1
+        while self.num_of_broadcasters[-1] != NUM_OF_CARS:
+            self.cars_move()
+            self.propagate(rd)
+            self.calculate_num_of_broadcasters()
+            # self.calculate_neighbor_percentage()  ###
+            if not EXCEED_MOVES and rd == NUM_OF_MOVES:
+                break
+            rd += 1
+
+    def summary(self):
+        courses = []
+        targets = []
+        for car in self.cars:
+            courses.append(car.courses)
+            targets.append(car.targets)
+        return courses, targets, self.num_of_broadcasters, self.neighbor_percentage
+
+
 class SynSimulation(Simulation):
     def propagate(self, rd):
         broadcaster_pos_list = [car.get_pos() for car in self.cars if car.when >= 0]
@@ -418,6 +411,16 @@ class RWP2Simulation(TorSynSimulation):
         super().__init__()
         self.cars.append(RWP2Car(0, seed, source_pos, source_source))
         self.cars.extend([RWP2Car(i, seed, source_pos) for i in range(1, NUM_OF_CARS)])
+
+
+class RWP2NSimulation(TorSynSimulation):
+    def __init__(self, seed, pos_course_dict):
+        super().__init__()
+        assert len(pos_course_dict.items()) == NUM_OF_SRCS
+        for i, (k, v) in enumerate(pos_course_dict.items()):
+            self.cars.append(RWP2Car(i, seed, k, v))
+        for i in range(len(pos_course_dict.items()), NUM_OF_CARS):
+            self.cars.extend([RWP2Car(i, seed, None, None)])
 
 
 class RDSimulation(SynSimulation):
@@ -605,7 +608,3 @@ class GUISnapshot(GUI):
                         else:
                             self.axs[i].plot(x, y, "ro", markersize=4)
                         break
-
-
-if __name__ == '__main__':
-    pass
