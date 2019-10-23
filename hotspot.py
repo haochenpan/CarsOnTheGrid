@@ -1,17 +1,17 @@
 import numpy as np
 from time import time
-from collections import defaultdict
 
 seed = str(time()).split(".")
 seed = [int(seed[0]), int(seed[1])]
-np.random.seed(seed)
+np.random.seed(seed)  # for np.random.choice
 
 
 class Coordinate:
     def __init__(self, x, y, s=1):
-        self.x = x
-        self.y = y
-        self.s = s
+        self.x = x  # x-coordinate
+        self.y = y  # y-coordinate
+        self.s = s  # the default share
+        # share / the sum of all shares =  the probability being chosen
 
     def __repr__(self):
         return f"({self.x:4.1f}, {self.y:4.1f})"
@@ -22,12 +22,12 @@ class SimulationMap:
         self.x_max = x
         self.y_max = y
         self.map_type = "torus" if map_t == "torus" else "plane"
-        self.mobility_type = mobility_t
-        self.map = []
-        self.idx = []
-        self.prob = []
-        self.granularity = 0.5
-        self.precision = 1
+        self.mobility_type = mobility_t  # TODO
+        self.map = []  # a 2d array, each 1d array is a row, each element is a Coordinate
+        self.idx = []  # a 1d array that records how many points are available for chosen
+        self.prob = []  # a 1d array that records the probability of each point being chosen
+        self.granularity = 0.5  # TODO
+        self.precision = 1  # TODO
 
     def init_map(self, ratio_dict=None):
         for j in np.arange(0, self.y_max, self.granularity):
@@ -36,8 +36,10 @@ class SimulationMap:
                 row.append(Coordinate(round(i, self.precision), round(j, self.precision)))
             self.map.append(row)
 
+        shares = len(self.map) * len(self.map[0])
+        print("original shares", shares)
+
         if ratio_dict is not None:
-            shares = len(self.map) * len(self.map[0])
             for share, items in ratio_dict.items():
                 shares -= len(items)
                 shares += len(items) * share
@@ -51,17 +53,23 @@ class SimulationMap:
                     if self.map[y_comp][x_comp].x != item[0] or self.map[y_comp][x_comp].y != item[1]:
                         raise Exception("receive item", item, "self.map[x_comp][y_comp]", self.map[y_comp][x_comp])
                     self.map[y_comp][x_comp].s = share
-                    print(item, self.map[y_comp][x_comp])
+                    print("share changed:", item, "new share(s)", share)
 
-            self.idx = [i for i in range(len(self.map) * len(self.map[0]))]
-            self.prob = np.array([np.float64(coor.s / shares) for row in self.map for coor in row])
-            self.prob /= self.prob.sum()
+        self.idx = [i for i in range(len(self.map) * len(self.map[0]))]
+        self.prob = np.array([np.float64(coor.s / shares) for row in self.map for coor in row])
+        self.prob /= self.prob.sum()
 
     def print_map(self):
+        print("\t\t\t", end="")
+        for i in range(len(self.map[0])):
+            print("col", i, end="\t\t\t")
+        print()
         for j, row in enumerate(self.map):
+            print("row", j, end="\t")
             for i, coor in enumerate(row):
                 # print(i, coor, self.prob[j * len(self.map[0]) + i], end="\t")
-                print(coor, self.prob[j * len(self.map[0]) + i], end="\t")
+                # print(coor, self.prob[j * len(self.map[0]) + i], end="\t")
+                print(coor, end="\t")
             print()
 
     def get_RWP1_target(self):
@@ -97,10 +105,10 @@ class SimulationMap:
 
 if __name__ == '__main__':
     a = SimulationMap()
-    shares = {
-        50: [(0.5, 0.5), (1, 0.5), (2, 5), (7, 9), (2, 4), (2, 8)],
-    }
-    a.init_map(shares)
+    # shares = {
+    #     50: [(0.5, 0.5), (1, 0.5), (2, 5), (7, 9), (2, 4), (2, 8)],
+    # }
+    a.init_map()
     a.print_map()
     a.get_RWP2_target((3, 3))
     a.get_RWP2_target((3, 3))
