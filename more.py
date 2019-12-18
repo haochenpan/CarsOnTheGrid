@@ -11,12 +11,13 @@ r = Redis(host='localhost', port=6379, db=0)
 
 if __name__ == '__main__':
     queries = [
-        "E-RWP2-x50-y50-c25-sx0-sy0-ctr",
-        "E-RWP2-x50-y50-c25-sx0-sy0-up",
-        "E-RWP2-x50-y50-c25-sx0-sy0-right",
-        "E-RWP2-x50-y50-c25-sx0-sy0-14",
-        "E-RWP2-x50-y50-c25-sx0-sy0-23",
-        "E-RWP2-x50-y50-c25-sx0-sy0-diag",
+        "E-RWP1-x50-y50-c25-sx0-sy0-cnr",
+        "E-RWP1-x50-y50-c50-sx0-sy0-cnr",
+        # "E-RWP2-x50-y50-c25-sx0-sy0-up",
+        # "E-RWP2-x50-y50-c25-sx0-sy0-right",
+        # "E-RWP2-x50-y50-c25-sx0-sy0-14",
+        # "E-RWP2-x50-y50-c25-sx0-sy0-23",
+        # "E-RWP2-x50-y50-c25-sx0-sy0-diag",
 
     ]
     results = []
