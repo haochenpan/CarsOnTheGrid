@@ -7,7 +7,7 @@ NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100
 EXCEED_MOVES = True
 
-fig_size = (6, 6)
+fig_size = (4, 4)
 
 assert 0 < X_MAX
 assert 0 < Y_MAX

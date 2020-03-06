@@ -1,5 +1,7 @@
 from random import Random
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 import numpy as np
 from help import *
 
@@ -253,9 +255,13 @@ class GUIFinalPos(GUI):
         source_targets = self.sim.cars[0].targets
         self.ax1.plot(*unzip(source_targets, self.mod), "ro", markersize=4)
 
-        self.ax1.set_xlabel("x axis")
-        self.ax1.set_ylabel("y axis")
-        self.ax1.set_title("final positions & the source's positions")
+        self.ax1.set_xlabel("x axis", fontdict={"size": 12})
+        self.ax1.set_ylabel("y axis", fontdict={"size": 12})
+        self.ax1.set_title("final positions and the source's trace")
+        blue_line = mlines.Line2D([], [], color='blue', marker='o', markersize=8, label="source's trace")
+        red_line = mlines.Line2D([], [], color='red', marker='o', markersize=8, label="source's targets")
+        green_line = mlines.Line2D([], [], color='green', marker='o', markersize=8, label="peers' final positions")
+        self.ax1.legend(handles=[blue_line, red_line, green_line], loc='upper left')
         self.ax1.grid(True)
 
 
@@ -306,9 +312,9 @@ class GUINumBro(GUIFinalPos):
         xs = [i for i in range(len(self.sim.num_of_broadcasters))]
         self.ax3.plot(xs, self.sim.num_of_broadcasters, marker='o', markersize=3)
 
-        self.ax3.set_xlabel("simulation round")
-        self.ax3.set_ylabel("# of msg received cars")
-        self.ax3.set_title("# of msg received cars vs. simulation round \n")
+        self.ax3.set_xlabel("rounds", fontdict={"size": 12})
+        self.ax3.set_ylabel("# of msg receivers", fontdict={"size": 12})
+        self.ax3.set_title("rounds vs. # of msg receivers")
         self.ax3.grid(True)
 
 
