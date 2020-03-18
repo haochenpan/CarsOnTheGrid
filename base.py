@@ -1,7 +1,7 @@
 from random import Random
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
-import matplotlib.patches as mpatches
+import matplotlib.animation as animation
 import numpy as np
 from help import *
 
@@ -337,7 +337,7 @@ class GUINumNei(GUIFinalPos):
 
 class GUISnapshot(GUI):
     def __init__(self, sim: Simulation, count=6, interval=10):
-        assert count in [6, 12]
+        assert count in [6, 12, 150]
         assert interval > 0
         self.sim = sim
         self.axs = []
@@ -347,10 +347,15 @@ class GUISnapshot(GUI):
             for i in range(6):
                 axi = self.fig.add_subplot(2, 3, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
                 self.axs.append(axi)
-        else:
+        elif count == 12:
             self.fig = plt.figure(figsize=(fig_size[0] * 3, fig_size[1] * 4))
             for i in range(12):
                 axi = self.fig.add_subplot(4, 3, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
+                self.axs.append(axi)
+        else:
+            self.fig = plt.figure(figsize=(fig_size[0] * 10, fig_size[1] * 15))
+            for i in range(150):
+                axi = self.fig.add_subplot(15, 10, i + 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
                 self.axs.append(axi)
         for axi in self.axs:
             axi.set_xticks(np.arange(0, X_MAX + 1, 5))
@@ -358,15 +363,23 @@ class GUISnapshot(GUI):
 
     def draw(self):
         for i, axi in enumerate(self.axs):
+            target_length = i * self.interval
+
             axi.set_title(f"at round {i * self.interval}")
-            source_courses = self.sim.cars[0].courses[:i * self.interval + 1]
+            source_acc_length = 0
+            for j, pos in enumerate(self.sim.cars[0].courses[1:]):
+                source_acc_length += get_dist(*pos, *self.sim.cars[0].courses[j])
+                if source_acc_length >= target_length:
+                    source_courses = self.sim.cars[0].courses[:j + 1]
+                    break
+            else:
+                raise Exception
             xys = list(zip(*source_courses))
             xs = list(map(lambda x: x % X_MAX, list(xys[0])))
             ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
             self.axs[i].plot(xs, ys, "bo", markersize=2)
             self.axs[i].grid(True)
 
-            target_length = i * self.interval
             for car in self.sim.cars:
                 acc_length = 0
                 for j, pos in enumerate(car.courses[1:]):
@@ -379,6 +392,48 @@ class GUISnapshot(GUI):
                         else:
                             self.axs[i].plot(x, y, "ro", markersize=4)
                         break
+
+
+class GUISnapshot2(GUI):
+    def __init__(self, sim: Simulation, rd=1):
+        self.sim = sim
+        self.i = rd
+        self.fig = plt.figure(figsize=fig_size)
+        self.axi = self.fig.add_subplot(1, 1, 1, xlim=[0, X_MAX], ylim=[0, Y_MAX])
+        self.axi.set_xticks(np.arange(0, X_MAX + 1, 5))
+        self.axi.set_yticks(np.arange(0, Y_MAX + 1, 5))
+
+    def draw(self):
+        i = self.i
+        target_length = i
+
+        self.axi.set_title(f"at round {i}")
+        source_acc_length = 0
+        for j, pos in enumerate(self.sim.cars[0].courses[1:]):
+            source_acc_length += get_dist(*pos, *self.sim.cars[0].courses[j])
+            if source_acc_length >= target_length:
+                source_courses = self.sim.cars[0].courses[:j + 1]
+                break
+        else:
+            raise Exception
+        xys = list(zip(*source_courses))
+        xs = list(map(lambda x: x % X_MAX, list(xys[0])))
+        ys = list(map(lambda y: y % Y_MAX, list(xys[1])))
+        self.axi.plot(xs, ys, "bo", markersize=4)
+        self.axi.grid(True)
+
+        for car in self.sim.cars:
+            acc_length = 0
+            for j, pos in enumerate(car.courses[1:]):
+                acc_length += get_dist(*pos, *car.courses[j])
+                if acc_length >= target_length:
+                    x = pos[0] % X_MAX
+                    y = pos[1] % Y_MAX
+                    if car.when <= i:
+                        self.axi.plot(x, y, "go", markersize=8)
+                    else:
+                        self.axi.plot(x, y, "ro", markersize=8)
+                    break
 
 
 if __name__ == '__main__':

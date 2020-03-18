@@ -238,11 +238,14 @@ if __name__ == '__main__':
     pass
     typ = "RWP2"
     RAND_SEED = "%.30f" % time()
+    # 1584493223.638249874114990234375000000000]
+    print(RAND_SEED)
     SOURCE_POS = (0, 0)
-    sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_zigzag_14())
+    sim = RWP2Simulation(RAND_SEED, SOURCE_POS, RWP2_zigzag_23())
     sim.simulate()
     print(sim.cars[0].courses)
 
-    gui = GUINumBro(sim, True, False)
-    gui.draw()
-    gui.save(f"{typ}_x{X_MAX}_y{Y_MAX}_c{NUM_OF_CARS}_14")
+    for i in range(200):
+        gui = GUISnapshot2(sim, i)
+        gui.draw()
+        gui.save(f"./pngs/{i}")

@@ -2,12 +2,12 @@ import math
 
 X_MAX = 50
 Y_MAX = X_MAX
-NUM_OF_CARS = 25
+NUM_OF_CARS = 50
 NUM_OF_MOVES = 500
 PRE_RUN_COUNT = 100
 EXCEED_MOVES = True
 
-fig_size = (4, 4)
+fig_size = (7, 7)
 
 assert 0 < X_MAX
 assert 0 < Y_MAX
